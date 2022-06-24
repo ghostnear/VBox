@@ -1,0 +1,9 @@
+# Binaries for programs and plugins
+main
+VBox
+*.exe
+*.exe~
+*.so
+*.dylib
+*.dll
+bin/
