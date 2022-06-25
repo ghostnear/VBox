@@ -6,5 +6,7 @@ VBox
 *.so
 *.dylib
 *.dll
+vls.log
 bin/
 roms/
+logs/

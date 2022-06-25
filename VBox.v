@@ -1,3 +1,4 @@
+// Main module
 module main
 
 import vbox_gui { GUIWindow }
@@ -11,7 +12,7 @@ fn main() {
 
 	mut test_vm := BytePusherVM{}
 	test_vm.init()
-	test_vm.load("roms/nyan.bp")
+	test_vm.load("../roms/nyan.bp")
 	test_vm.run()
 
 	gui_window.run()

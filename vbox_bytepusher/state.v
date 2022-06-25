@@ -1,19 +1,20 @@
-module vbox_bytepusher_state
+// BytePusher VM state handling module
+module vbox_bytepusher
 
 import os { read_bytes }
 
 /*	Struct Definition	*/
 pub struct BytePusherState {
 mut:
-	mem	[]byte
-	pc	int
+	mem	[]u8
+	pc	u32
 }
 
 /*	Private Methods	*/
 
 // Fetches 3-byte value at the specified adress
-fn (mut v BytePusherState) fetch(pc int) int {
-	return v.mem[pc] << 16 | v.mem[pc + 1] << 8 | v.mem[pc + 2]
+fn (mut v BytePusherState) fetch(pc u32) u32 {
+	return u32(v.mem[pc]) << 16 | u32(v.mem[pc + 1]) << 8 | u32(v.mem[pc + 2])
 }
 
 /*	Public Methods	*/
@@ -21,12 +22,20 @@ fn (mut v BytePusherState) fetch(pc int) int {
 // Initialises the state with the default values
 pub fn (mut v BytePusherState) init() {
 	v.pc = 0
-	v.mem = []byte{len: 0x1000008, init: 0}
+	v.mem = []u8{len: 0x1000008, init: 0}
 }
 
 // Loads a ROM from the specified path
 pub fn (mut v BytePusherState) load(path string) {
-	//by := read_bytes(path) or { panic("Input file not found.") }
+	by := read_bytes(path) or { panic("Input file not found.") }
+	// File is too big
+	if by.len > 0x1000000 {
+		panic("File too big to be a BytePusher ROM.")
+	}
+	else {
+		// Copy the bytes to the start of the VM array
+		copy(mut v.mem, by)
+	}
 }
 
 // Inner loop called by the VM

@@ -1,14 +1,16 @@
+// BytePusher virtual machine
 module vbox_bytepusher
 
+import log { Log }
 import time { new_stopwatch, sleep }
-import vbox_bytepusher_state { BytePusherState }
 
 /*	Struct Definition	*/
 pub struct BytePusherVM {
 mut:
 	emu_state	BytePusherState
+	emu_log		Log
 	running 	bool
-	emu_thread 	thread	
+	emu_thread 	thread
 }
 
 /*	Private Methods	*/
@@ -46,6 +48,8 @@ fn (mut v BytePusherVM) thread_func() {
 pub fn (mut v BytePusherVM) init() {
 	v.running = false
 	v.emu_state.init()
+	v.emu_log.set_full_logpath("./bytepusher.log")
+	v.emu_log.log_to_console_too()
 }
 
 // Loads the ROM from path - sends it to the state
@@ -68,5 +72,6 @@ pub fn (mut v BytePusherVM) stop() {
 	if v.running == true {
 		v.running = false
 		v.emu_thread.wait()
+		v.emu_log.flush()
 	}
 }

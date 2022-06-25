@@ -1,3 +1,4 @@
+// Handles the GUI and the window
 module vbox_gui
 
 import ui
