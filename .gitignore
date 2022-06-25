@@ -7,3 +7,4 @@ VBox
 *.dylib
 *.dll
 bin/
+roms/
