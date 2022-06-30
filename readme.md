@@ -1,6 +1,7 @@
 # VBox - Multiplatform emulator written in V
 
 ## Current targets
+- [ ] Integrate VBox with VStorm. That requires more features on the VStorm side of things.
 - [ ] Have a BytePusher virtual machine.
 - [ ] Have a working GUI to manage ROM files.
 - [ ] Make the VM render to the screen.
