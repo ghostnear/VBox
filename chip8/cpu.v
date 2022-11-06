@@ -20,7 +20,7 @@ pub fn (mut self CPU) step(parent &VM)
 }
 
 // Creates a new CPU instance.
-pub fn new_cpu() &CPU
+fn new_cpu() &CPU
 {
 	cpu := &CPU {
 		execution_flag: false

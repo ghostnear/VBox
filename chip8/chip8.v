@@ -25,6 +25,7 @@ pub fn new_vm() &VM
 {
 	v := &VM{
 		cpu: new_cpu()
+		mem: new_mem()
 	}
 	return v
 }
@@ -44,12 +45,13 @@ pub fn (mut self VM) start()
 // Waits for the execution thread to stop, then deletes it.
 pub fn (mut self VM) wait_for_finish()
 {
-	if self.cpu.execution_flag == true
+	if self.cpu.execution_flag == true || self.emulation_thread == unsafe { nil }
 	{
 		return
 	}
 
-	self.emulation_thread.wait()
+	// TODO: figure out why this panics V sometimes.
+	// self.emulation_thread.wait()
 	self.emulation_thread = unsafe { nil }
 }
 
@@ -64,6 +66,13 @@ pub fn (mut self VM) stop()
 pub fn (mut self VM) load_rom(path string)
 {
 	self.rom.load_from_file(path)
+	self.mem.load_rom(self.rom)
+}
+
+// Steps once, useful for debugging
+fn (mut self VM) step_once()
+{
+	self.cpu.step(self)
 }
 
 // Internal loop that does the emulation on a different thread.

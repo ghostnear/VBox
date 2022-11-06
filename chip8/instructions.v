@@ -53,8 +53,8 @@ pub fn (mut self CPU) execute_opcode()
 		{
 			// Revert changes, stop and print output.
 			self.pc -= 2
-			println("Opcode unknown at address ${ self.pc:04X }!")
-			println("Value: ${ self.current_instruction.value:04X }")
+			println("Unknown opcode at address ${ self.pc:04X }!")
+			println("Value: ${ self.current_instruction.value:04X }.")
 			self.execution_flag = false
 		}
 	else
@@ -63,7 +63,7 @@ pub fn (mut self CPU) execute_opcode()
 			self.pc -= 2
 			println("Opcode unimplemented at address ${ self.pc:04X }!")
 			println("Value: ${ self.current_instruction.value:04X }")
-			println("Type: ${ self.current_instruction.instruction_type }")
+			println("Type: ${ self.current_instruction.instruction_type }.")
 			self.execution_flag = false
 		}
 	}

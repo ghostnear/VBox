@@ -5,7 +5,7 @@ import os
 // ROM data structure.
 pub struct ROM
 {
-mut:
+pub mut:
 	data []u8
 }
 
@@ -19,7 +19,7 @@ pub fn (mut self ROM) load_from_file(path string)
 
 	// Check the file size.
 	rom_size := os.file_size(path)
-	if rom_size >= 0x10000 - 0x200
+	if rom_size >= 0x10000
 	{
 		rom_file.close()
 		println("ROM file at path ${ path } is too big to be a CHIP8 ROM!")
