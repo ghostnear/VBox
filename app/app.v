@@ -17,6 +17,13 @@ pub fn new() &App
 pub fn(self &App) start()
 {
 	mut test_vm := chip8.new_vm()
+	//test_vm.load_rom('roms/tests/test_opcode.ch8')
 	test_vm.start()
-	for {}
+	for {
+		test_vm.wait_for_finish()
+		if !test_vm.cpu.execution_flag
+		{
+			break
+		}
+	}
 }

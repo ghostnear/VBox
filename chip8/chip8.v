@@ -16,6 +16,7 @@ pub mut:
 	snd Audio
 	inp Input
 	tim Timers
+	rom ROM
 	emulation_thread &thread = unsafe { nil }
 }
 
@@ -40,6 +41,32 @@ pub fn (mut self VM) start()
 	}
 }
 
+// Waits for the execution thread to stop, then deletes it.
+pub fn (mut self VM) wait_for_finish()
+{
+	if self.cpu.execution_flag == true
+	{
+		return
+	}
+
+	self.emulation_thread.wait()
+	self.emulation_thread = unsafe { nil }
+}
+
+// Marks the emulation thread as stopped, doesn't do any actual thread stopping.
+// Use stop_and_wait() for that instead.
+pub fn (mut self VM) stop()
+{
+	self.cpu.execution_flag = false
+}
+
+// Reads a ROM file from the specified path.
+pub fn (mut self VM) load_rom(path string)
+{
+	self.rom.load_from_file(path)
+}
+
+// Internal loop that does the emulation on a different thread.
 fn (mut self VM) internal_loop()
 {
 	// Infinite loop
