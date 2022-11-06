@@ -10,7 +10,45 @@ fn test_nops()
 	{
 		// This should step only into NOPs
 		vm.step_once()
-		assert vm.cpu.current_instruction.instruction_type == .instruction_nop
+		assert vm.cpu.current_instruction.instruction_type == .instruction_nop, 'RAM memory was not initialised with 0s!'
 	}
-	assert vm.cpu.pc == 0x20A
+	assert vm.cpu.pc == 0x20A, 'Flow incorrect when going trough NOPs!'
+}
+
+fn test_jumps()
+{
+	mut vm := new_vm()
+	vm.mem.copy_bytes(
+		0x200,
+		[
+			u8(0x00), u8(0x00) // NOP to satisfy the compiler
+			0x12, 0x06 // JMP 0x0206
+			0x12, 0x30 // JMP 0x0230
+			0x14, 0x60 // JMP 0x0460
+		]
+	)
+	vm.step_once()
+	vm.step_once()
+	assert vm.cpu.current_instruction.instruction_type == .instruction_jmp, 'Wrong instruction type detected!'
+	assert vm.cpu.pc == 0x206, 'Jumped to the wrong address!'
+
+	vm.step_once()
+	assert vm.cpu.current_instruction.instruction_type == .instruction_jmp, 'Wrong instruction type detected!'
+	assert vm.cpu.pc == 0x460, 'Jumped to the wrong address!'
+}
+
+fn test_reg_ops()
+{
+	mut vm := new_vm()
+	vm.mem.copy_bytes(
+		0x200,
+		[
+			u8(0x00), u8(0x00) // NOP to satisfy the compiler
+			0x6A, 0x30 // LD VA, 0x30
+		]
+	)
+	vm.step_once()
+	vm.step_once()
+	assert vm.cpu.current_instruction.instruction_type == .instruction_set_register_constant, 'Wrong instruction type detected!'
+	assert vm.cpu.rg[0xA] == 0x30, 'Wrong value assigned to register!'
 }

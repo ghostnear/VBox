@@ -5,6 +5,8 @@ enum InstructionType
 {
 	instruction_type_unknown = 0
 	instruction_nop
+	instruction_jmp
+	instruction_set_register_constant
 	instruction_test
 }
 
@@ -30,6 +32,16 @@ pub fn (mut self CPU) decode_opcode(opcode u16)
 				self.current_instruction.instruction_type = .instruction_nop
 			}
 		}
+		0x1
+		{
+			// JMP NNN
+			self.current_instruction.instruction_type = .instruction_jmp
+		}
+		0x6
+		{
+			// Vx = 0xNN
+			self.current_instruction.instruction_type = .instruction_set_register_constant
+		}
 		else
 		{
 			self.current_instruction.instruction_type = .instruction_type_unknown
@@ -48,6 +60,16 @@ pub fn (mut self CPU) execute_opcode()
 	.instruction_nop
 		{
 			// Do nothing of course.
+		}
+	.instruction_jmp
+		{
+			// JMP NNN
+			self.pc = self.current_instruction.value & 0xFFF
+		}
+	.instruction_set_register_constant
+		{
+			// Vx = 0xNN
+			self.rg[(self.current_instruction.value & 0xF00) >> 8] = u8(self.current_instruction.value & 0xFF)
 		}
 	.instruction_type_unknown
 		{

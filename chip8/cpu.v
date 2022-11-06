@@ -9,6 +9,7 @@ pub mut:
 	current_instruction CPUInstruction
 mut:
 	pc u16
+	rg []u8
 }
 
 // Steps the CPU one instruction in.
@@ -25,6 +26,7 @@ fn new_cpu() &CPU
 	cpu := &CPU {
 		execution_flag: false
 		halt_flag: false
+		rg: []u8 {len: 0x10, cap: 0x10, init: 0}
 		pc: 0x0200
 	}
 	return cpu

@@ -1,5 +1,8 @@
 module chip8
 
+// The documentation that was mainly used for this:
+// https://github.com/chip-8/extensions
+
 // CHIP8 virtual machine configuration.
 pub struct VMConfig
 {
