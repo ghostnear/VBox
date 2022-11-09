@@ -10,7 +10,6 @@ fn test_nops()
 	{
 		// This should step only into NOPs
 		vm.step_once()
-		assert vm.cpu.current_instruction.instruction_type == .instruction_nop, 'RAM memory was not initialised with 0s!'
 	}
 	assert vm.cpu.pc == 0x20A, 'Flow incorrect when going trough NOPs!'
 }
@@ -29,11 +28,9 @@ fn test_jumps()
 	)
 	vm.step_once()
 	vm.step_once()
-	assert vm.cpu.current_instruction.instruction_type == .instruction_jmp, 'Wrong instruction type detected!'
 	assert vm.cpu.pc == 0x206, 'Jumped to the wrong address!'
 
 	vm.step_once()
-	assert vm.cpu.current_instruction.instruction_type == .instruction_jmp, 'Wrong instruction type detected!'
 	assert vm.cpu.pc == 0x460, 'Jumped to the wrong address!'
 }
 
@@ -49,6 +46,5 @@ fn test_reg_ops()
 	)
 	vm.step_once()
 	vm.step_once()
-	assert vm.cpu.current_instruction.instruction_type == .instruction_set_register_constant, 'Wrong instruction type detected!'
 	assert vm.cpu.rg[0xA] == 0x30, 'Wrong value assigned to register!'
 }

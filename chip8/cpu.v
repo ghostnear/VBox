@@ -6,7 +6,6 @@ struct CPU
 pub mut:
 	execution_flag bool
 	halt_flag bool
-	current_instruction CPUInstruction
 mut:
 	pc u16
 	rg []u8
@@ -16,8 +15,7 @@ mut:
 pub fn (mut self CPU) step(parent &VM)
 {
 	opcode_value := parent.mem.fetch_word(self.pc)
-	self.decode_opcode(opcode_value)
-	self.execute_opcode()
+	self.execute_opcode(opcode_value)
 }
 
 // Creates a new CPU instance.
