@@ -12,7 +12,18 @@ pub fn (mut self CPU) execute_opcode(opcode u16, mut parent &VM)
 		0x0
 		{
 			// NOP
-			if opcode == 0x0000 {}
+			if opcode & 0xFFF == 0x000 {}
+			// CLS
+			else if opcode & 0xFFF == 0x0E0
+			{
+				parent.gfx.clear()
+			}
+			else
+			{
+				println("Unknown instruction at address ${ self.pc:04X }!")
+				println("Value of opcode is: ${ opcode:04X }!")
+				self.execution_flag = false				
+			}
 		}
 		0x1
 		{
@@ -25,6 +36,31 @@ pub fn (mut self CPU) execute_opcode(opcode u16, mut parent &VM)
 			if self.register[(opcode & 0xF00) >> 8] == opcode & 0xFF
 			{
 				self.pc += 2
+			}
+		}
+		0x4
+		{
+			// SNE VX, NN
+			if self.register[(opcode & 0xF00) >> 8] != opcode & 0xFF
+			{
+				self.pc += 2
+			}
+		}
+		0x5
+		{
+			// SE VX, VY
+			if opcode & 0xF == 0x0
+			{
+				if self.register[(opcode & 0xF00) >> 8] == self.register[(opcode & 0xF0) >> 4]
+				{
+					self.pc += 2
+				}
+			}
+			else
+			{
+				println("Unknown instruction at address ${ self.pc:04X }!")
+				println("Value of opcode is: ${ opcode:04X }!")
+				self.execution_flag = false				
 			}
 		}
 		0x6
@@ -62,6 +98,23 @@ pub fn (mut self CPU) execute_opcode(opcode u16, mut parent &VM)
 						}
 					}
 				}
+			}
+		}
+		0xF
+		{
+			// LD VX, [I]
+			if opcode & 0xFF == 0x65
+			{
+				for index := 0; index <= (opcode & 0xF00) >> 8; index++
+				{
+					self.register[index] = parent.mem.fetch_byte(u16(self.ir + index))
+				}
+			}
+			else
+			{
+				println("Unknown instruction at address ${ self.pc:04X }!")
+				println("Value of opcode is: ${ opcode:04X }!")
+				self.execution_flag = false
 			}
 		}
 		else

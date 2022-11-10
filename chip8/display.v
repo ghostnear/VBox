@@ -69,6 +69,15 @@ pub fn (mut self Display) resize(newSize utils.Vec2<int>)
 	self.buffer = []u8{len: self.size.x * self.size.y / 8, cap: self.size.x * self.size.y / 8, init: 0}
 }
 
+pub fn (mut self Display) clear()
+{
+	self.draw_flag = true
+	for index := 0; index < self.buffer.len; index++
+	{
+		self.buffer[index] = 0
+	}
+}
+
 [inline]
 pub fn new_dsp() &Display
 {
