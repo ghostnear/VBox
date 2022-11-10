@@ -8,6 +8,7 @@ mut:
 }
 
 // Fetches a byte form the memory at the specified address.
+[inline]
 [direct_array_access]
 pub fn (self Memory) fetch_byte(address u16) u8
 {
@@ -15,7 +16,6 @@ pub fn (self Memory) fetch_byte(address u16) u8
 }
 
 // Copies an array of bytes directly to the memory at the specified offset.
-[direct_array_access]
 pub fn (mut self Memory) copy_bytes(offset u16, bytes []u8)
 {
 	for index := 0; index < bytes.len; index++
@@ -32,12 +32,14 @@ pub fn (mut self Memory) load_rom(rom ROM)
 }
 
 // Fetches a 16-bit word from the memory at the specified address.
+[inline]
 pub fn (self Memory) fetch_word(address u16) u16
 {
 	return (u16(self.fetch_byte(address)) << 8) | self.fetch_byte(address + 1)
 }
 
 // Creates a new memory instance
+[inline]
 fn new_mem() &Memory
 {
 	mut mem := &Memory {
