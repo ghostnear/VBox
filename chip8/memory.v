@@ -8,12 +8,20 @@ mut:
 	ram []u8
 }
 
-// Fetches a byte form the memory at the specified address.
+// Fetches a byte from the memory at the specified address.
 [inline]
 [direct_array_access]
 pub fn (self Memory) fetch_byte(address u16) u8
 {
 	return self.ram[address]
+}
+
+// Saves a byte to the memory at the specified address.
+[inline]
+[direct_array_access]
+pub fn (mut self Memory) save_byte(address u16, value u8)
+{
+	self.ram[address] = value
 }
 
 // Copies an array of bytes directly to the memory at the specified offset.

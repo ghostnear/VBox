@@ -15,15 +15,13 @@ pub mut:
 [inline]
 pub fn (mut self Display) get_pixel(x int, y int) u8
 {
-	array_index := x / 8 + self.size.x * y / 8
-	return (self.buffer[array_index] >> (x % 8)) & 1
+	return (self.buffer[x / 8 + self.size.x * y / 8] >> (x % 8)) & 1
 }
 
 [inline]
 pub fn (mut self Display) set_pixel(x int, y int)
 {
-	array_index := x / 8 + self.size.x * y / 8
-	self.buffer[array_index] |= 1 << (x % 8)
+	self.buffer[x / 8 + self.size.x * y / 8] |= 1 << (x % 8)
 }
 
 [inline]

@@ -196,6 +196,24 @@ fn (mut self CPU) generate_execution_table()
 		self.register[(opcode & 0xF00) >> 8] = self.register[(opcode & 0xF0) >> 4]
 	}
 
+	// AND VX, VY
+	self.arithmetic_table[0x2] = fn(mut self &CPU, opcode u16, mut parent &VM)
+	{
+		self.register[(opcode & 0xF00) >> 8] &= self.register[(opcode & 0xF0) >> 4]
+	}
+
+	// ADD VX, VY
+	self.arithmetic_table[0x4] = fn(mut self &CPU, opcode u16, mut parent &VM)
+	{
+		self.register[0xF] = 0x1
+		old_vx := self.register[(opcode & 0xF00) >> 8]
+		self.register[(opcode & 0xF00) >> 8] += self.register[(opcode & 0xF0) >> 4]
+		if self.register[(opcode & 0xF00) >> 8] < old_vx
+		{
+			self.register[0xF] = 1
+		}
+	}
+
 	// SHR VX, VY
 	self.arithmetic_table[0x6] = fn(mut self &CPU, opcode u16, mut parent &VM)
 	{
@@ -229,6 +247,12 @@ fn (mut self CPU) generate_execution_table()
 		{
 			self.register[0xF] = 1
 		}
+	}
+
+	// LD [I], Vx
+	self.special_table[0x55] = fn(mut self &CPU, opcode u16, mut parent &VM)
+	{
+		parent.mem.copy_bytes(self.ir, self.register[0..((opcode & 0xF00) >> 8)])
 	}
 
 	// LD VX, [I]
