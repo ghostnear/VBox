@@ -3,6 +3,7 @@ module chip8
 import term
 import utilities as utils
 
+[heap]
 struct Display
 {
 pub mut:

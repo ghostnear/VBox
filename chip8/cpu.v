@@ -1,11 +1,17 @@
 module chip8
 
 // CHIP8 CPU structure.
+[heap]
 struct CPU
 {
 pub mut:
 	execution_flag bool
 	halt_flag bool
+
+	// Instruction tables for easier lookups.
+	system_table []fn(&CPU, u16, &VM)
+	instruction_table []fn(&CPU, u16, &VM)
+	special_table []fn(&CPU, u16, &VM)
 
 	// Registers
 	pc u16
@@ -24,12 +30,13 @@ pub fn (mut self CPU) step(mut parent &VM)
 [inline]
 fn new_cpu() &CPU
 {
-	cpu := &CPU {
+	mut cpu := &CPU {
 		execution_flag: false
 		halt_flag: false
 		register: []u8 {len: 0x10, cap: 0x10, init: 0}
 		pc: 0x0200
 		ir: 0x0000
 	}
+	cpu.generate_execution_table()
 	return cpu
 }

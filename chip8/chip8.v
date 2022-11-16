@@ -11,6 +11,7 @@ pub struct VMConfig
 }
 
 // CHIP8 virtual machine structure.
+[heap]
 pub struct VM
 {
 pub mut:

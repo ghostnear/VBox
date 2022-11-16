@@ -3,6 +3,7 @@ module chip8
 import os
 
 // ROM data structure.
+[heap]
 pub struct ROM
 {
 pub mut:

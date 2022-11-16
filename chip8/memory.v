@@ -1,6 +1,7 @@
 module chip8
 
 // CHIP8 memory structure.
+[heap]
 struct Memory
 {
 mut:
