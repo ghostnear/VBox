@@ -1,13 +1,14 @@
 module chip8
 
-import utilities as utils
+import rand
 
 // UNKWN
 [inline]
 fn unknown_opcode(mut self &CPU, opcode u16, mut parent &VM)
 {
+	self.pc -= 2
 	println("Fatal Error:")
-	println("Unknown instruction at address ${ self.pc - 2:04X }!")
+	println("Unknown instruction at address ${ self.pc:04X }!")
 	println("Value of opcode is: ${ opcode:04X }!")
 	self.execution_flag = false
 }
@@ -50,6 +51,22 @@ fn (mut self CPU) generate_execution_table()
 	// JMP NNN
 	self.instruction_table[0x1] = fn(mut self &CPU, opcode u16, mut parent &VM)
 	{
+		if self.pc == opcode & 0xFFF + 2
+		{
+			println("Warning:")
+			println("Found infinite jump at address ${ self.pc - 2:04X }!")
+			println("Pausing execution!")
+			self.execution_flag = false
+		}
+
+		self.pc = opcode & 0xFFF
+	}
+	
+	// CALL NNN
+	self.instruction_table[0x2] = fn(mut self &CPU, opcode u16, mut parent &VM)
+	{
+		self.sp += 1
+		self.stack[self.sp] = self.pc
 		self.pc = opcode & 0xFFF
 	}
 
@@ -102,6 +119,12 @@ fn (mut self CPU) generate_execution_table()
 		self.ir &= 0xFFF
 	}
 
+	// RND VX, NN
+	self.instruction_table[0xC] = fn(mut self &CPU, opcode u16, mut parent &VM)
+	{
+		self.register[(opcode & 0xF00) >> 8] = u8(u16(rand.i16()) & (opcode & 0xFF))
+	}
+
 	// DRW VX, VY, N
 	// Display N-byte sprite starting at memory location I at (VX, VY).
 	// Each set bit is xored with what's already drawn. VF is set to 1 if a collision occurs, 0 otherwise.
@@ -114,13 +137,11 @@ fn (mut self CPU) generate_execution_table()
 			current_value := parent.mem.fetch_byte(u16(current_index + self.ir))
 			for inside_index := 0; inside_index < 8; inside_index++
 			{
-				if (current_value & (1 << (8 - inside_index))) != 0
+				if (current_value & (1 << (7 - inside_index))) != 0
 				{
-					collision := parent.gfx.xor_pixel(
+					if parent.gfx.xor_pixel(
 						self.register[(opcode & 0xF00) >> 8] + inside_index,
-						self.register[(opcode & 0xF0) >> 4] + current_index
-					)
-					if collision == 1
+						self.register[(opcode & 0xF0) >> 4] + current_index) == 1
 					{
 						self.register[0xF] = 1
 					}
@@ -139,13 +160,17 @@ fn (mut self CPU) generate_execution_table()
 		System instructions (start with 0x00)
 	*/
 
-	// NOP
-	self.system_table[0x000] = fn(mut self &CPU, opcode u16, mut parent &VM) {}
-
 	// CLS
 	self.system_table[0x0E0] = fn(mut self &CPU, opcode u16, mut parent &VM)
 	{
 		parent.gfx.clear()
+	}
+
+	// RET
+	self.system_table[0x0EE] = fn(mut self &CPU, opcode u16, mut parent &VM)
+	{
+		self.pc = self.stack[self.sp]
+		self.sp -= 1
 	}
 
 	/*
@@ -165,6 +190,12 @@ fn (mut self CPU) generate_execution_table()
 		Register arithmetic instructions (start with 0x8)
 	*/
 
+	// LD VX, VY
+	self.arithmetic_table[0x0] = fn(mut self &CPU, opcode u16, mut parent &VM)
+	{
+		self.register[(opcode & 0xF00) >> 8] = self.register[(opcode & 0xF0) >> 4]
+	}
+
 	// SHR VX, VY
 	self.arithmetic_table[0x6] = fn(mut self &CPU, opcode u16, mut parent &VM)
 	{
@@ -172,9 +203,33 @@ fn (mut self CPU) generate_execution_table()
 		self.register[(opcode & 0xF00) >> 8] >>= 1
 	}
 
+	// SHL VX, VY
+	self.arithmetic_table[0xE] = fn(mut self &CPU, opcode u16, mut parent &VM)
+	{
+		self.register[0xF] = self.register[(opcode & 0xF00) >> 8] & 0b10000000
+		self.register[(opcode & 0xF00) >> 8] <<= 1
+	}
+
 	/*
 		Special instructions (start with 0xF)
 	*/
+
+	// LD DT, VX
+	self.special_table[0x15] = fn(mut self &CPU, opcode u16, mut parent &VM)
+	{
+		parent.tim.dt = self.register[(opcode & 0xF00) >> 8]
+	}
+
+	// ADD I, VX
+	self.special_table[0x1E] = fn(mut self &CPU, opcode u16, mut parent &VM)
+	{
+		self.register[0xF] = 0
+		self.ir += self.register[(opcode & 0xF00) >> 8]
+		if self.ir > 0xFFF
+		{
+			self.register[0xF] = 1
+		}
+	}
 
 	// LD VX, [I]
 	self.special_table[0x65] = fn(mut self &CPU, opcode u16, mut parent &VM)

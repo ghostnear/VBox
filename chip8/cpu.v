@@ -19,6 +19,10 @@ pub mut:
 	pc u16
 	register []u8
 	ir u16
+
+	// Stack
+	sp u8
+	stack []u16
 }
 
 // Steps the CPU one instruction in.
@@ -35,9 +39,11 @@ fn new_cpu() &CPU
 	mut cpu := &CPU {
 		execution_flag: false
 		halt_flag: false
+		stack: []u16{len: 0x10, cap: 0x10, init: 0}
 		register: []u8 {len: 0x10, cap: 0x10, init: 0}
 		pc: 0x0200
 		ir: 0x0000
+		sp: 0x00
 	}
 	cpu.generate_execution_table()
 	return cpu

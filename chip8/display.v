@@ -31,7 +31,7 @@ pub fn (mut self Display) xor_pixel(x int, y int) int
 {
 	array_index := x / 8 + self.size.x * y / 8
 	mut result := 0
-	if self.get_pixel(x, y) == 1 && (self.buffer[array_index] & 1 << (x % 8)) == 1
+	if self.get_pixel(x, y) == 1 && (self.buffer[array_index] & (1 << (x % 8))) == 1
 	{
 		result = 1
 	}
@@ -41,7 +41,7 @@ pub fn (mut self Display) xor_pixel(x int, y int) int
 
 pub fn (mut self Display) render_to_terminal()
 {
-	term.clear()
+	term.set_cursor_position(x: 0, y: 0)
 	term.hide_cursor()
 	for y := 0; y < self.size.y; y++
 	{
@@ -49,7 +49,7 @@ pub fn (mut self Display) render_to_terminal()
 		{
 			if self.get_pixel(x, y) == 1
 			{
-				print("#")
+				print("█")
 			}
 			else
 			{
