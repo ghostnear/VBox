@@ -9,7 +9,9 @@ pub mut:
 	halt_flag bool
 
 	// Instruction tables for easier lookups.
+	arithmetic_table []fn(&CPU, u16, &VM)
 	system_table []fn(&CPU, u16, &VM)
+	register_ops_table []fn(&CPU, u16, &VM)
 	instruction_table []fn(&CPU, u16, &VM)
 	special_table []fn(&CPU, u16, &VM)
 

@@ -13,45 +13,41 @@ pub mut:
 }
 
 [inline]
-pub fn (mut self Display) get_pixel(position utils.Vec2<int>) u8
+pub fn (mut self Display) get_pixel(x int, y int) u8
 {
-	array_index := position.x / 8 + self.size.x * position.y / 8
-	return (self.buffer[array_index] >> (position.x % 8)) & 1
+	array_index := x / 8 + self.size.x * y / 8
+	return (self.buffer[array_index] >> (x % 8)) & 1
 }
 
 [inline]
-pub fn (mut self Display) set_pixel(position utils.Vec2<int>)
+pub fn (mut self Display) set_pixel(x int, y int)
 {
-	array_index := position.x / 8 + self.size.x * position.y / 8
-	self.buffer[array_index] |= 1 << (position.x % 8)
+	array_index := x / 8 + self.size.x * y / 8
+	self.buffer[array_index] |= 1 << (x % 8)
 }
 
 [inline]
-pub fn (mut self Display) xor_pixel(position utils.Vec2<int>) bool
+pub fn (mut self Display) xor_pixel(x int, y int) int
 {
-	array_index := position.x / 8 + self.size.x * position.y / 8
-	mut result := false
-	if self.get_pixel(position) == 1 && (self.buffer[array_index] & 1 << (position.x % 8)) == 1
+	array_index := x / 8 + self.size.x * y / 8
+	mut result := 0
+	if self.get_pixel(x, y) == 1 && (self.buffer[array_index] & 1 << (x % 8)) == 1
 	{
-		result = true
+		result = 1
 	}
-	self.buffer[array_index] ^= 1 << (position.x % 8)
+	self.buffer[array_index] ^= 1 << (x % 8)
 	return result
 }
 
 pub fn (mut self Display) render_to_terminal()
 {
 	term.clear()
-	mut position := utils.Vec2<int>
+	term.hide_cursor()
+	for y := 0; y < self.size.y; y++
 	{
-		x: 0
-		y: 0
-	}
-	for ; position.y < self.size.y; position.y++
-	{
-		for ; position.x < self.size.x; position.x++
+		for x := 0; x < self.size.x; x++
 		{
-			if self.get_pixel(position) == 1
+			if self.get_pixel(x, y) == 1
 			{
 				print("#")
 			}
@@ -60,7 +56,7 @@ pub fn (mut self Display) render_to_terminal()
 				print(" ")
 			}
 		}
-		println("")
+		print("\n")
 	}
 }
 
