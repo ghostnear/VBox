@@ -113,6 +113,23 @@ fn (mut self CPU) generate_execution_table()
 		self.arithmetic_table[opcode & 0xF](self, opcode, parent)
 	}
 
+	// SNE VX, VY
+	self.instruction_table[0x9] = fn(mut self &CPU, opcode u16, mut parent &VM)
+	{
+		// All opcodes start with 0x0
+		if opcode & 0xF != 0
+		{
+			unknown_opcode(mut self, opcode, mut parent)
+		}
+		else
+		{
+			if self.register[(opcode & 0xF00) >> 8] != self.register[(opcode & 0xF0) >> 4]
+			{
+				self.pc += 2
+			}
+		}
+	}
+
 	// LD I, NNN
 	self.instruction_table[0xA] = fn(mut self &CPU, opcode u16, mut parent &VM)
 	{
@@ -225,10 +242,22 @@ fn (mut self CPU) generate_execution_table()
 		self.register[(opcode & 0xF00) >> 8] = self.register[(opcode & 0xF0) >> 4]
 	}
 
+	// OR VX, VY
+	self.arithmetic_table[0x1] = fn(mut self &CPU, opcode u16, mut parent &VM)
+	{
+		self.register[(opcode & 0xF00) >> 8] |= self.register[(opcode & 0xF0) >> 4]
+	}
+
 	// AND VX, VY
 	self.arithmetic_table[0x2] = fn(mut self &CPU, opcode u16, mut parent &VM)
 	{
 		self.register[(opcode & 0xF00) >> 8] &= self.register[(opcode & 0xF0) >> 4]
+	}
+
+	// XOR VX, VY
+	self.arithmetic_table[0x3] = fn(mut self &CPU, opcode u16, mut parent &VM)
+	{
+		self.register[(opcode & 0xF00) >> 8] ^= self.register[(opcode & 0xF0) >> 4]
 	}
 
 	// ADD VX, VY
@@ -238,6 +267,18 @@ fn (mut self CPU) generate_execution_table()
 		old_vx := self.register[(opcode & 0xF00) >> 8]
 		self.register[(opcode & 0xF00) >> 8] += self.register[(opcode & 0xF0) >> 4]
 		if self.register[(opcode & 0xF00) >> 8] < old_vx
+		{
+			self.register[0xF] = 1
+		}
+	}
+
+	// SUB VX, VY
+	self.arithmetic_table[0x5] = fn(mut self &CPU, opcode u16, mut parent &VM)
+	{
+		self.register[0xF] = 0x1
+		old_vx := self.register[(opcode & 0xF00) >> 8]
+		self.register[(opcode & 0xF00) >> 8] -= self.register[(opcode & 0xF0) >> 4]
+		if self.register[(opcode & 0xF00) >> 8] > old_vx
 		{
 			self.register[0xF] = 1
 		}
