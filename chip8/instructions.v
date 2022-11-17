@@ -26,6 +26,7 @@ fn (mut self CPU) generate_execution_table()
 	}
 	for index := 0; index < 0x100; index++
 	{
+		self.keyboard_instruction_table.insert(index, unknown_opcode)
 		self.special_table.insert(index, unknown_opcode)
 		self.system_table.insert(index, unknown_opcode)
 	}
@@ -131,7 +132,6 @@ fn (mut self CPU) generate_execution_table()
 	self.instruction_table[0xD] = fn(mut self &CPU, opcode u16, mut parent &VM)
 	{
 		self.register[0xF] = 0
-		parent.gfx.draw_flag = true
 		for current_index := 0; current_index < opcode & 0xF; current_index++
 		{
 			current_value := parent.mem.fetch_byte(u16(current_index + self.ir))
@@ -139,6 +139,7 @@ fn (mut self CPU) generate_execution_table()
 			{
 				if (current_value & (1 << (7 - inside_index))) != 0
 				{
+					parent.gfx.draw_flag = true
 					if parent.gfx.xor_pixel(
 						self.register[(opcode & 0xF00) >> 8] + inside_index,
 						self.register[(opcode & 0xF0) >> 4] + current_index) == 1
@@ -148,6 +149,12 @@ fn (mut self CPU) generate_execution_table()
 				}
 			}
 		}
+	}
+
+	// Send to the keyboard opcode stable
+	self.instruction_table[0xE] = fn(mut self &CPU, opcode u16, mut parent &VM)
+	{
+		self.keyboard_instruction_table[opcode & 0xFF](self, opcode, parent)
 	}
 
 	// Send to the special opcodes table
@@ -171,6 +178,28 @@ fn (mut self CPU) generate_execution_table()
 	{
 		self.pc = self.stack[self.sp]
 		self.sp -= 1
+	}
+
+	/*
+		Keyboard instructions (start with 0xE)
+	*/
+
+	// SKP VX
+	self.keyboard_instruction_table[0x9E] = fn(mut self &CPU, opcode u16, mut parent &VM)
+	{
+		if parent.inp.is_pressed(self.register[(opcode & 0xF00) >> 8])
+		{
+			self.pc += 2
+		}
+	}
+
+	// SKNP VX
+	self.keyboard_instruction_table[0xA1] = fn(mut self &CPU, opcode u16, mut parent &VM)
+	{
+		if !parent.inp.is_pressed(self.register[(opcode & 0xF00) >> 8])
+		{
+			self.pc += 2
+		}
 	}
 
 	/*
@@ -231,6 +260,12 @@ fn (mut self CPU) generate_execution_table()
 	/*
 		Special instructions (start with 0xF)
 	*/
+
+	// LD Vx, DT
+	self.special_table[0x07] = fn(mut self &CPU, opcode u16, mut parent &VM)
+	{
+		self.register[(opcode & 0xF00) >> 8] = parent.tim.dt
+	}
 
 	// LD DT, VX
 	self.special_table[0x15] = fn(mut self &CPU, opcode u16, mut parent &VM)

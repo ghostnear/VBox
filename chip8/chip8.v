@@ -4,12 +4,6 @@ module chip8
 // https://github.com/chip-8/extensions
 // https://github.com/trapexit/chip-8_documentation
 
-// CHIP8 virtual machine configuration.
-pub struct VMConfig
-{
-	
-}
-
 // CHIP8 virtual machine structure.
 [heap]
 pub struct VM
@@ -31,6 +25,7 @@ mut:
 pub fn new_vm() &VM
 {
 	v := &VM{
+		inp: new_inp()
 		cpu: new_cpu()
 		mem: new_mem()
 		gfx: new_dsp()
@@ -64,6 +59,7 @@ pub fn (mut self VM) wait_for_finish() bool
 
 	// TODO: figure out why this panics V sometimes.
 	// self.emulation_thread.wait()
+	
 	self.emulation_thread = unsafe { nil }
 	return false
 }
@@ -110,7 +106,7 @@ fn (mut self VM) internal_loop()
 			self.step_once()
 		}
 
-		// Do drawing if required
+		// Do drawing only if required
 		if self.gfx.draw_flag
 		{
 			self.gfx.render_to_terminal()

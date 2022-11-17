@@ -11,9 +11,7 @@ struct App
 [inline]
 pub fn new_app() &App
 {
-	a := &App {
-
-	}
+	a := &App {}
 	return a
 }
 
@@ -27,7 +25,8 @@ pub fn(self &App) start()
 
 	// Start the emulation thread and wait for it to finish.
 	test_vm.start()
-	for {
+	for
+	{
 		if !test_vm.wait_for_finish()
 		{
 			break

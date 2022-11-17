@@ -36,8 +36,11 @@ pub fn (mut self Memory) copy_bytes(offset u16, bytes []u8)
 // Loads a ROM to the memory at the specified offset.
 pub fn (mut self Memory) load_rom(rom ROM)
 {
-	println("Loaded ROM with length ${ rom.data.len } bytes!")
-	self.copy_bytes(0x200, rom.data)
+	if rom.data.len > 0
+	{
+		println("Loaded ROM with length ${ rom.data.len } bytes!")
+		self.copy_bytes(0x200, rom.data)
+	}
 }
 
 // Fetches a 16-bit word from the memory at the specified address.
