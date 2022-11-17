@@ -299,12 +299,3 @@ fn (mut self CPU) generate_execution_table()
 		}
 	}
 }
-
-// Directly executes an encoded opcode.
-[inline]
-pub fn (mut self CPU) execute_opcode(opcode u16, mut parent &VM)
-{
-	// Advance PC
-	self.pc += 2
-	self.instruction_table[(opcode & 0xF000) >> 12](self, opcode, parent)
-}

@@ -21,7 +21,7 @@ pub fn(self &App) start()
 	// TODO: not do this...
 	term.clear()
 	mut test_vm := chip8.new_vm()
-	test_vm.load_rom('roms/chip8/programs/IBM Logo.ch8')
+	test_vm.load_rom('roms/chip8/tests/test_opcode.ch8')
 
 	// Start the emulation thread and wait for it to finish.
 	test_vm.start()
