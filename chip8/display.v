@@ -25,11 +25,13 @@ pub fn (mut self Display) set_pixel(x int, y int)
 }
 
 [inline]
-pub fn (mut self Display) xor_pixel(x int, y int) int
+pub fn (mut self Display) xor_pixel(pos_x int, pos_y int) int
 {
+	x := pos_x % self.size.x
+	y := pos_y % self.size.y
 	array_index := x / 8 + self.size.x * y / 8
 	mut result := 0
-	if self.get_pixel(x, y) == 1 && (self.buffer[array_index] & (1 << (x % 8))) == 1
+	if self.get_pixel(x, y) == 1
 	{
 		result = 1
 	}

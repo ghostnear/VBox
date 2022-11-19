@@ -57,7 +57,7 @@ fn (mut self CPU) generate_execution_table()
 			println("Warning:")
 			println("Found infinite jump at address ${ self.pc - 2:04X }!")
 			println("Pausing execution!")
-			self.execution_flag = false
+			self.halt_flag = true
 		}
 
 		self.pc = opcode & 0xFFF
@@ -323,6 +323,12 @@ fn (mut self CPU) generate_execution_table()
 		{
 			self.register[0xF] = 1
 		}
+	}
+
+	// 	BCD VX
+	self.special_table[0x33] = fn(mut self &CPU, opcode u16, mut parent &VM)
+	{
+		parent.mem.copy_bytes(self.ir, [self.register[(opcode & 0xF00) >> 8] / 100, (self.register[(opcode & 0xF00) >> 8] / 10) % 10, self.register[(opcode & 0xF00) >> 8] % 10])
 	}
 
 	// LD [I], Vx

@@ -4,6 +4,8 @@ module chip8
 // https://github.com/chip-8/extensions
 // https://github.com/trapexit/chip-8_documentation
 
+import time
+
 // CHIP8 virtual machine structure.
 [heap]
 pub struct VM
@@ -16,6 +18,7 @@ pub mut:
 	inp Input
 	tim Timers
 	rom ROM
+	emulation_speed f64
 mut:
 	emulation_thread &thread = unsafe { nil }
 }
@@ -25,7 +28,9 @@ mut:
 pub fn new_vm() &VM
 {
 	v := &VM{
+		emulation_speed: 300.0
 		inp: new_inp()
+		tim: new_tim()
 		cpu: new_cpu()
 		mem: new_mem()
 		gfx: new_dsp()
@@ -100,10 +105,14 @@ fn (mut self VM) internal_loop()
 {
 	// Infinite loop
 	for {
-		// If the cpu is not halted, then run. Very likely ofc.
-		if _likely_(!self.cpu.halt_flag)
+		// Start timing
+		self.tim.emulation_timer.restart()
+		
+		// Compensate for the passed ammout of time.
+		for _likely_(self.tim.emulation_dt > 1e+9 / self.emulation_speed && !self.cpu.halt_flag && self.cpu.execution_flag)
 		{
 			self.step_once()
+			self.tim.emulation_dt -= 1e+9 / self.emulation_speed
 		}
 
 		// Do drawing only if required
@@ -112,6 +121,12 @@ fn (mut self VM) internal_loop()
 			self.gfx.render_to_terminal()
 			self.gfx.draw_flag = false
 		}
+
+		// Sleep till next instruction
+		time.sleep(int(1e+9 / self.emulation_speed - self.tim.emulation_dt))
+
+		// Update the timings and prepare for next step.
+		self.tim.update()
 
 		// Stop entirely when we are forced to
 		if _unlikely_(!self.cpu.execution_flag)
