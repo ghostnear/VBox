@@ -23,11 +23,13 @@ pub mut:
 }
 
 // Main struct that holds all app data.
+[heap]
 struct App
 {
 mut:
-	log log.Log
-	gfx	Graphics
+	log 		log.Log
+	gfx			Graphics
+	locale		string = "en"
 }
 
 [inline]
@@ -44,21 +46,24 @@ pub fn new_app(cfg AppConfig) &App
 	// Create logging requirements.
 	os.mkdir('logs') or {}
 	a.log.set_full_logpath("./logs/" + time.now().str().replace(' ', '_').replace(':', '-') + ".log")
-	
+
+	// Log app data
+	a.log.info(locale.get_string(a.locale, "info_log_session_info"))
+	a.log.info(locale.get_string(a.locale, "info_log_app_version") + app_version)
+	a.log.info(locale.get_string(a.locale, "info_log_language_name") + a.locale + " (" + locale.get_string(a.locale, "language_name") + ")")
+	a.log.info(locale.get_string(a.locale, "info_log_compiled_with") + version.full_v_version(true))
+	a.log.info("-------------------------------")
+
 	// Stuff that can generate errors goes here.
-	a.gfx = new_gfx(cfg.gfx_config) or {
+	a.gfx = new_gfx(cfg.gfx_config, a) or {
 		term.clear()
-		locale.print_fatal_error(err.str())
+		locale.print_fatal_error(a.locale, err.str())
 		a.log.error(err.str())
 		exit(-1)
 	}
 
-	// Log that init has been done properly and app data..
-	a.log.info("Information about this session:")
-	a.log.info("App version: " + app_version)
-	a.log.info("Compiled using " + version.full_v_version(true))
-	a.log.info("-------------------------------")
-	a.log.info("App was initialized properly.")
+	// Init complete.
+	a.log.info(locale.get_string(a.locale, "info_log_init_properly"))
 
 	return a
 }
@@ -67,10 +72,13 @@ pub fn new_app(cfg AppConfig) &App
 pub fn(mut self App) quit()
 {
 	// Destroy all graphics related data.
-	self.gfx.destroy()
+	self.gfx.destroy() or {
+		self.log.error(err.str())
+		exit(-1)
+	}
 
 	// Log that exit has been done.
-	self.log.info("App exited properly.")
+	self.log.info(locale.get_string(self.locale, "info_log_exit_properly"))
 }
 
 [inline]
