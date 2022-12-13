@@ -1,7 +1,13 @@
 import app
 
-pub fn main()
+fn main()
 {
-	app := app.new_app()
+	// Config for app info.
+	mut config := app.AppConfig {}
+	config.gfx_config.display_mode = .sdl
+
+	// App instantiation
+	mut app := app.new_app(config)
 	app.start()
+	app.quit()
 }

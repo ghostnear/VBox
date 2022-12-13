@@ -1,5 +1,8 @@
-# Ignore ROMS
+# Ignore ROMS and logs
 roms/
+logs/
 
 # Ignore built files
 *.exe
+*.dll
+*.log
