@@ -1,7 +1,6 @@
 module chip8
 
 [heap]
-struct Audio
-{
+struct Audio {
 	// TODO: soon
 }

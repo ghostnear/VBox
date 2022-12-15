@@ -2,18 +2,15 @@ module app
 
 import sdl
 
-struct Input
-{
+struct Input {
 mut:
-	hooks map[string]map[string]fn(voidptr)
+	hooks map[string]map[string]fn (voidptr)
 	event &sdl.Event = &sdl.Event{}
 }
 
 [inline]
-fn (mut self Input) call_all_hooks(identifier string, args voidptr)
-{
-	for _, function in self.hooks[identifier]
-	{
+fn (mut self Input) call_all_hooks(identifier string, args voidptr) {
+	for _, function in self.hooks[identifier] {
 		function(args)
 	}
 }
@@ -21,62 +18,49 @@ fn (mut self Input) call_all_hooks(identifier string, args voidptr)
 // Adds a hook to be called upon an event occuring.
 // ! Be careful to not have overlapping identfiers or inexistent events as those won't be called. !
 [inline]
-pub fn (mut self Input) add_hook(event string, identifier string, function fn(voidptr))
-{
+pub fn (mut self Input) add_hook(event string, identifier string, function fn (voidptr)) {
 	self.hooks[event][identifier] = function
 }
 
 [inline]
-pub fn (mut self Input) remove_hook(event string, identifier string)
-{
+pub fn (mut self Input) remove_hook(event string, identifier string) {
 	self.hooks[event].delete(identifier)
 }
 
-pub fn (mut self Input) key_down(key sdl.KeyCode)
-{
-	self.call_all_hooks("key_down", &key)
+pub fn (mut self Input) key_down(key sdl.KeyCode) {
+	self.call_all_hooks('key_down', &key)
 
 	// Define global keybinds here.
 }
 
-pub fn (mut self Input) key_up(key sdl.KeyCode)
-{
-	self.call_all_hooks("key_up", &key)
+pub fn (mut self Input) key_up(key sdl.KeyCode) {
+	self.call_all_hooks('key_up', &key)
 
 	// Define global keybinds here.
 }
 
-pub fn poll_events(mut app App)
-{
-	for sdl.poll_event(app.input.event) > 0
-	{
+pub fn poll_events(mut app App) {
+	for sdl.poll_event(app.input.event) > 0 {
 		// TODO: more inputs
-		match app.input.event.@type
-		{
+		match app.input.event.@type {
 			// App has been quit (by any means)
-			.quit 
-			{
+			.quit {
 				app.quit()
 			}
-
 			// Key has been pressed
-			.keydown
-			{
+			.keydown {
 				// Get the keycode
 				key := unsafe { sdl.KeyCode(app.input.event.key.keysym.sym) }
-				
+
 				app.input.key_down(key)
 			}
-
 			// Key has been released
-			.keyup
-			{
+			.keyup {
 				// Get the keycode
 				key := unsafe { sdl.KeyCode(app.input.event.key.keysym.sym) }
-				
+
 				app.input.key_up(key)
 			}
-
 			else {}
 		}
 	}
