@@ -17,7 +17,7 @@ pub struct AppConfig
 {
 pub mut:
 	gfx_config GraphicsConfig = GraphicsConfig {
-		window_title: "VBox" + app_version
+		window_title: "VBox " + app_version
 		display_mode: .other
 	}
 }
@@ -27,9 +27,11 @@ pub mut:
 struct App
 {
 mut:
+	running		bool = true
 	log 		log.Log
 	gfx			Graphics
-	locale		string = "en"
+	input		Input
+	locale		string = "ro"
 }
 
 [inline]
@@ -65,11 +67,27 @@ pub fn new_app(cfg AppConfig) &App
 	// Init complete.
 	a.log.info(locale.get_string(a.locale, "info_log_init_properly"))
 
+	// Execute this when app quits.
+	C.atexit(a.destroy)
+
 	return a
 }
 
 [inline]
-pub fn(mut self App) quit()
+pub fn (self App) is_running() bool
+{
+	return self.running
+}
+
+[inline]
+pub fn (mut self App) quit()
+{
+	self.running = false
+	self.log.info(locale.get_string(self.locale, "info_log_quitting"))
+}
+
+[inline]
+pub fn (mut self App) destroy()
 {
 	// Destroy all graphics related data.
 	self.gfx.destroy() or {
@@ -79,29 +97,4 @@ pub fn(mut self App) quit()
 
 	// Log that exit has been done.
 	self.log.info(locale.get_string(self.locale, "info_log_exit_properly"))
-}
-
-[inline]
-pub fn(self &App) start()
-{
-	
-	// Create new CHIP8 VM and force load the test rom for now.
-	// TODO: not do this...
-	/*term.clear()
-	mut test_vm := chip8.new_vm()
-	test_vm.load_rom('roms/chip8/games/Tetris [Fran Dachille, 1991].ch8')
-
-	// Start the emulation thread and wait for it to finish.
-	test_vm.start()
-	for
-	{
-		if !test_vm.wait_for_finish()
-		{
-			break
-		}
-
-		// Update 60 times a second just to be sure.
-		// TODO: this thing should have an actual update time, depending on the UI type.
-		time.sleep(1e+9 / 60.0)
-	}*/
 }

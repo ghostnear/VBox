@@ -11,6 +11,16 @@ pub enum DisplayMode
 	sdl
 }
 
+pub fn (self DisplayMode) str() string
+{
+	match self
+	{
+		.other { return "?" }
+		.terminal { return "terminal" }
+		.sdl { return "sdl"}
+	}
+}
+
 pub struct GraphicsConfig
 {
 pub mut:
@@ -75,7 +85,9 @@ fn new_gfx(cfg GraphicsConfig, parent &App) ?&Graphics
 	{
 		.terminal
 		{
-			// Do nothing about it for now...
+			// Set up terminal
+			term.clear()
+			term.set_terminal_title(cfg.window_title)
 		}
 
 		.sdl
@@ -106,7 +118,6 @@ fn new_gfx(cfg GraphicsConfig, parent &App) ?&Graphics
 				return error(locale.get_string(parent.locale, "message_sdl_could_not_create_renderer"))
 			}
 		}
-
 		else
 		{
 			return error(locale.get_string(parent.locale, "message_unknown_graphics_selected"))

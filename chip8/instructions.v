@@ -160,9 +160,9 @@ fn (mut self CPU) generate_execution_table()
 					if parent.gfx.xor_pixel(
 						self.register[(opcode & 0xF00) >> 8] + inside_index,
 						self.register[(opcode & 0xF0) >> 4] + current_index) == 1
-					{
-						self.register[0xF] = 1
-					}
+							{
+								self.register[0xF] = 1
+							}
 				}
 			}
 		}
@@ -328,13 +328,23 @@ fn (mut self CPU) generate_execution_table()
 	// 	BCD VX
 	self.special_table[0x33] = fn(mut self &CPU, opcode u16, mut parent &VM)
 	{
-		parent.mem.copy_bytes(self.ir, [self.register[(opcode & 0xF00) >> 8] / 100, (self.register[(opcode & 0xF00) >> 8] / 10) % 10, self.register[(opcode & 0xF00) >> 8] % 10])
+		parent.mem.copy_bytes(
+			self.ir,
+			[
+				self.register[(opcode & 0xF00) >> 8] / 100,
+				(self.register[(opcode & 0xF00) >> 8] / 10) % 10,
+				self.register[(opcode & 0xF00) >> 8] % 10
+			]
+		)
 	}
 
 	// LD [I], Vx
 	self.special_table[0x55] = fn(mut self &CPU, opcode u16, mut parent &VM)
 	{
-		parent.mem.copy_bytes(self.ir, self.register[0..((opcode & 0xF00) >> 8)])
+		parent.mem.copy_bytes(
+			self.ir,
+			self.register[..((opcode & 0xF00) >> 8)]
+		)
 	}
 
 	// LD VX, [I]
