@@ -36,6 +36,7 @@ mut:
 [inline]
 pub fn new_vm(cfg VMConfig, parent &app.App) &VM
 {
+	// TODO: use configs and subsystems like for gfx
 	mut v := &VM{
 		app: parent
 		emulation_speed: 300.0

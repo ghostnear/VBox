@@ -5,6 +5,8 @@ struct Input
 {
 pub mut:
 	keys []u8
+
+	// TODO: key bindings and hooks in the main app.
 }
 
 [inline]

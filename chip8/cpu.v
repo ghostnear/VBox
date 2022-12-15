@@ -46,6 +46,7 @@ pub fn (mut self CPU) execute_opcode(opcode u16, mut parent &VM)
 [inline]
 fn new_cpu() &CPU
 {
+	// TODO: CPU config
 	mut cpu := &CPU {
 		execution_flag: false
 		halt_flag: false

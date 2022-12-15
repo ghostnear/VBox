@@ -39,6 +39,7 @@ pub fn (mut self Memory) load_rom(rom ROM)
 	if rom.data.len > 0
 	{
 		println("Loaded ROM with length ${ rom.data.len } bytes!")
+		// TODO: use the logs for this.
 		self.copy_bytes(0x200, rom.data)
 	}
 }

@@ -6,6 +6,8 @@ struct Input
 {
 pub mut:
 	event &sdl.Event = &sdl.Event{}
+
+	// TODO: key bindings and hooks into main app
 }
 
 pub fn poll_events(mut app App)

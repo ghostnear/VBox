@@ -36,9 +36,8 @@ pub fn (mut self Display) xor_pixel(pos_x int, pos_y int) int
 {
 	x := pos_x % self.size.x
 	y := pos_y % self.size.y
-	array_index := x / 8 + self.size.x * y / 8
 	mut result := self.get_pixel(x, y)
-	self.buffer[array_index] ^= 1 << (x % 8)
+	self.buffer[x / 8 + self.size.x * y / 8] ^= 1 << (x % 8)
 	return result
 }
 
@@ -48,7 +47,7 @@ pub fn (mut self Display) render()
 {
 	match self.vm.app.gfx.display_mode
 	{
-		// Terminal
+		// Print directly to the screen.
 		.terminal {
 			term.hide_cursor()
 			term.set_cursor_position(x: 0, y: 0)
@@ -70,7 +69,8 @@ pub fn (mut self Display) render()
 			}
 		}
 
-		// SDL
+		// Lock the SDL_Texture and update it accordingly.
+		// TODO
 		.sdl {
 
 		}
@@ -82,8 +82,12 @@ pub fn (mut self Display) render()
 
 pub fn (mut self Display) resize(newSize utils.Vec2<int>)
 {
+	// Create buffer with new size
 	self.size = newSize
+	self.draw_flag = true
 	self.buffer = []u8{len: self.size.x * self.size.y / 8, cap: self.size.x * self.size.y / 8, init: 0}
+
+	// TODO: do stuff to the display depending on the output (resize texture for SDL or clear screen for terminal)
 }
 
 pub fn (mut self Display) clear()

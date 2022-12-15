@@ -10,6 +10,7 @@ fn unknown_opcode(mut self &CPU, opcode u16, mut parent &VM)
 	println("Fatal Error:")
 	println("Unknown instruction at address ${ self.pc:04X }!")
 	println("Value of opcode is: ${ opcode:04X }!")
+	// TODO: use the logs for this.
 	self.execution_flag = false
 }
 
@@ -58,6 +59,7 @@ fn (mut self CPU) generate_execution_table()
 			println("Found infinite jump at address ${ self.pc - 2:04X }!")
 			println("Pausing execution!")
 			self.halt_flag = true
+			// TODO: also use the logs for this.
 		}
 
 		self.pc = opcode & 0xFFF

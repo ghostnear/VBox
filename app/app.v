@@ -6,6 +6,7 @@ import term
 import time
 import locale
 import v.util.version
+import utilities as utils
 
 const app_version_minor = "1"
 const app_version_middle = "0"
@@ -47,6 +48,14 @@ pub fn new_app(cfg AppConfig) &App
 
 	// Create logging requirements.
 	os.mkdir('logs') or {}
+
+	// Check if there are 5 logs already, if so, delete the first one chronologically.
+	mut files := os.ls("./logs/") or { [""] }// This should already exist, so no errors.
+	for files.len >= 5
+	{
+		os.rm("./logs/" + files[0]) or {}	// Should work most of the times, unless the file is read only (shouldn't be the case).
+		files = files[1..files.len]
+	}
 	a.log.set_full_logpath("./logs/" + time.now().str().replace(' ', '_').replace(':', '-') + ".log")
 
 	// Log app data
@@ -59,7 +68,7 @@ pub fn new_app(cfg AppConfig) &App
 	// Stuff that can generate errors goes here.
 	a.gfx = new_gfx(cfg.gfx_config, a) or {
 		term.clear()
-		locale.print_fatal_error(a.locale, err.str())
+		utils.print_fatal_error(a.locale, err.str())
 		a.log.error(err.str())
 		exit(-1)
 	}
@@ -83,6 +92,7 @@ pub fn (self App) is_running() bool
 [inline]
 pub fn (mut self App) quit()
 {
+	// Stop app and save logs
 	self.running = false
 	self.log.info(locale.get_string(self.locale, "info_log_quitting"))
 	self.log.flush()
