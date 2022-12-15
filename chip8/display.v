@@ -48,9 +48,9 @@ pub fn (mut self Display) render() {
 				mut line := ''
 				for x := 0; x < self.size.x; x++ {
 					if self.get_pixel(x, y) == 1 {
-						line += '█'
+						line += term.rgb(255, 135, 125, '█')
 					} else {
-						line += ' '
+						line += term.bg_rgb(10, 10, 10, ' ')
 					}
 				}
 				println(line)
