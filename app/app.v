@@ -24,14 +24,14 @@ pub mut:
 
 // Main struct that holds all app data.
 [heap]
-struct App
+pub struct App
 {
-mut:
+pub mut:
 	running		bool = true
 	log 		log.Log
 	gfx			Graphics
 	input		Input
-	locale		string = "ro"
+	locale		string = "en"
 }
 
 [inline]
@@ -66,6 +66,7 @@ pub fn new_app(cfg AppConfig) &App
 
 	// Init complete.
 	a.log.info(locale.get_string(a.locale, "info_log_init_properly"))
+	a.log.flush()
 
 	// Execute this when app quits.
 	C.atexit(a.destroy)
@@ -84,6 +85,7 @@ pub fn (mut self App) quit()
 {
 	self.running = false
 	self.log.info(locale.get_string(self.locale, "info_log_quitting"))
+	self.log.flush()
 }
 
 [inline]
@@ -95,6 +97,7 @@ pub fn (mut self App) destroy()
 		exit(-1)
 	}
 
-	// Log that exit has been done.
+	// Log that exit has been done and make sure everything is flushed properly.
 	self.log.info(locale.get_string(self.locale, "info_log_exit_properly"))
+	self.log.flush()
 }

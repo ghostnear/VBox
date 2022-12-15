@@ -3,13 +3,20 @@ module chip8
 import term
 import utilities as utils
 
+struct DisplayConfig
+{
+pub mut:
+	parent		&VM = unsafe { nil }
+}
+
 [heap]
 struct Display
 {
 pub mut:
-	draw_flag bool
-	size utils.Vec2<int>
-	buffer []u8
+	vm			&VM = unsafe { nil }	
+	draw_flag 	bool
+	size 		utils.Vec2<int>
+	buffer 		[]u8
 }
 
 [inline]
@@ -30,33 +37,46 @@ pub fn (mut self Display) xor_pixel(pos_x int, pos_y int) int
 	x := pos_x % self.size.x
 	y := pos_y % self.size.y
 	array_index := x / 8 + self.size.x * y / 8
-	mut result := 0
-	if self.get_pixel(x, y) == 1
-	{
-		result = 1
-	}
+	mut result := self.get_pixel(x, y)
 	self.buffer[array_index] ^= 1 << (x % 8)
 	return result
 }
 
-pub fn (mut self Display) render_to_terminal()
+// Render the dispaly to the specified target.
+// For SDL it is an SDL_Texture, for terminal it is the IO.
+pub fn (mut self Display) render()
 {
-	term.set_cursor_position(x: 0, y: 0)
-	term.hide_cursor()
-	for y := 0; y < self.size.y; y++
+	match self.vm.app.gfx.display_mode
 	{
-		for x := 0; x < self.size.x; x++
-		{
-			if self.get_pixel(x, y) == 1
+		// Terminal
+		.terminal {
+			term.hide_cursor()
+			term.set_cursor_position(x: 0, y: 0)
+			for y := 0; y < self.size.y; y++
 			{
-				print("█")
-			}
-			else
-			{
-				print(" ")
+				mut line := ""
+				for x := 0; x < self.size.x; x++
+				{
+					if self.get_pixel(x, y) == 1
+					{
+						line += "█"
+					}
+					else
+					{
+						line += " "
+					}
+				}
+				println(line)
 			}
 		}
-		print("\n")
+
+		// SDL
+		.sdl {
+
+		}
+
+		// This shouldn't happen.
+		else {}
 	}
 }
 
@@ -76,9 +96,10 @@ pub fn (mut self Display) clear()
 }
 
 [inline]
-pub fn new_dsp() &Display
+pub fn new_dsp(cfg DisplayConfig, parent &VM) &Display
 {
-	mut display := &Display{
+	mut display := &Display {
+		vm:	parent
 		draw_flag: true
 	}
 	display.resize(

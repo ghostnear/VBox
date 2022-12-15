@@ -15,9 +15,9 @@ pub fn (self DisplayMode) str() string
 {
 	match self
 	{
-		.other { return "?" }
 		.terminal { return "terminal" }
 		.sdl { return "sdl"}
+		else { return "?" }
 	}
 }
 
@@ -33,7 +33,7 @@ pub mut:
 [heap]
 struct Graphics
 {
-mut:
+pub mut:
 	parent			&App = unsafe { nil }
 	display_mode 	DisplayMode
 	sdl_window 		&sdl.Window = sdl.null
@@ -47,7 +47,7 @@ fn (self &Graphics) destroy() ?bool
 	{
 		.terminal
 		{
-			// Clear the terminal
+			// Clear the terminal and hide the cursor.
 			term.clear()
 		}
 

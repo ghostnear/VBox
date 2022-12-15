@@ -2,6 +2,7 @@ module locale
 
 const map_en = {
 	"language_name": "English"
+	"info_log_quitting": "Quitting app..."
 	"info_log_app_version": "App version: "
 	"info_log_session_info": "Information about this session:"
 	"info_log_compiled_with": "Compiled with "

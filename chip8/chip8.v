@@ -4,13 +4,23 @@ module chip8
 // https://github.com/chip-8/extensions
 // https://github.com/trapexit/chip-8_documentation
 
+import app
 import time
+
+// Virtual machine config.
+pub struct VMConfig
+{
+pub mut:
+	rom_path 	string
+	gfx_config  DisplayConfig
+}
 
 // CHIP8 virtual machine structure.
 [heap]
 pub struct VM
 {
-pub mut:
+mut:
+	app &app.App = unsafe { nil }
 	cpu CPU
 	mem Memory
 	gfx Display
@@ -19,22 +29,28 @@ pub mut:
 	tim Timers
 	rom ROM
 	emulation_speed f64
-mut:
 	emulation_thread &thread = unsafe { nil }
 }
 
 // Creates a new instance of the VM.
 [inline]
-pub fn new_vm() &VM
+pub fn new_vm(cfg VMConfig, parent &app.App) &VM
 {
-	v := &VM{
+	mut v := &VM{
+		app: parent
 		emulation_speed: 300.0
 		inp: new_inp()
 		tim: new_tim()
 		cpu: new_cpu()
 		mem: new_mem()
-		gfx: new_dsp()
 	}
+
+	// Initialise subsystems
+	v.gfx = new_dsp(cfg.gfx_config, v)
+
+	// Load the ROM
+	v.load_rom(cfg.rom_path)
+	
 	return v
 }
 
@@ -62,10 +78,13 @@ pub fn (mut self VM) wait_for_finish() bool
 		return true
 	}
 
-	// TODO: figure out why this panics V sometimes.
-	// self.emulation_thread.wait()
-	
-	self.emulation_thread = unsafe { nil }
+	// If thread is not already stopped, make sure to stop it.
+	if self.emulation_thread != unsafe { nil }
+	{
+		self.emulation_thread.wait()
+		self.emulation_thread = unsafe { nil }
+	}
+
 	return false
 }
 
@@ -118,7 +137,7 @@ fn (mut self VM) internal_loop()
 		// Do drawing only if required
 		if self.gfx.draw_flag
 		{
-			self.gfx.render_to_terminal()
+			self.gfx.render()
 			self.gfx.draw_flag = false
 		}
 
