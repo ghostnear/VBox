@@ -2,16 +2,17 @@ module app
 
 import os
 import log
+import sdl
 import term
 import time
 import locale
 import v.util.version
 import utilities as utils
 
-const app_version_minor = "1"
-const app_version_middle = "0"
-const app_version_major = "0"
-const app_version = "${app_version_major}.${app_version_middle}.${app_version_minor}"
+pub const app_version_minor = "1"
+pub const app_version_middle = "0"
+pub const app_version_major = "0"
+pub const app_version = "${app_version_major}.${app_version_middle}.${app_version_minor}"
 
 // Struct that helps create the app.
 pub struct AppConfig
@@ -104,8 +105,12 @@ pub fn (mut self App) destroy()
 	// Destroy all graphics related data.
 	self.gfx.destroy() or {
 		self.log.error(err.str())
+		utils.print_fatal_error(self.locale, err.str())
 		exit(-1)
 	}
+
+	// Quit SDL
+	sdl.quit()
 
 	// Log that exit has been done and make sure everything is flushed properly.
 	self.log.info(locale.get_string(self.locale, "info_log_exit_properly"))

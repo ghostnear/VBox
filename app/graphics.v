@@ -62,7 +62,6 @@ fn (self &Graphics) destroy() ?bool
 			{
 				sdl.destroy_window(self.sdl_window)
 			}
-			sdl.quit()
 		}
 
 		// This shouldn't happen.			
@@ -80,6 +79,9 @@ fn new_gfx(cfg GraphicsConfig, parent &App) ?&Graphics
 		display_mode: cfg.display_mode
 	}
 
+	// Init SDL stuff (everything is required as some stuff are used even without windowed display)
+	sdl.init(sdl.init_everything)
+
 	// Do different stuff depending on the display driver.
 	match cfg.display_mode
 	{
@@ -92,9 +94,6 @@ fn new_gfx(cfg GraphicsConfig, parent &App) ?&Graphics
 
 		.sdl
 		{
-			// Init SDL stuff
-			sdl.init(sdl.init_video)
-
 			// Create window
 			gfx.sdl_window = sdl.create_window(
 				cfg.window_title.str,

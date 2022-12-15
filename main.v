@@ -9,6 +9,7 @@ fn main()
 	// Instantiate app using default config.
 	mut config := app.AppConfig {
 		gfx_config: app.GraphicsConfig {
+			window_title: "VBox v " + app.app_version 
 			display_mode: .terminal
 		}
 	}
@@ -16,7 +17,7 @@ fn main()
 
 	// Instantiate VM using default config.
 	mut vm_config := chip8.VMConfig {
-		rom_path: 'roms/chip8/games/Tetris [Fran Dachille, 1991].ch8'
+		rom_path: 'roms/chip8/games/Pong 2 (Pong hack) [David Winter, 1997].ch8'
 	}
 	mut chip8_vm := chip8.new_vm(vm_config, app_instance)
 
