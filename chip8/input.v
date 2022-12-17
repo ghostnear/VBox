@@ -51,8 +51,8 @@ pub fn (mut self Input) on_key_up(key voidptr) {
 }
 
 pub fn (mut self Input) destroy() {
-	self.parent.app.input.remove_hook('key_up', 'chip8_key_up')
-	self.parent.app.input.remove_hook('key_up', 'chip8_key_down')
+	self.parent.app.input.hooks.remove_hook('key_up', 'chip8_key_up')
+	self.parent.app.input.hooks.remove_hook('key_up', 'chip8_key_down')
 }
 
 [inline]
@@ -69,8 +69,8 @@ pub fn new_inp(cfg InputConfig, mut parent VM) &Input {
 	}
 
 	// Set up hooks in main input
-	parent.app.input.add_hook('key_up', 'chip8_key_up', input.on_key_up)
-	parent.app.input.add_hook('key_down', 'chip8_key_down', input.on_key_down)
+	parent.app.input.hooks.add_hook('key_up', 'chip8_key_up', input.on_key_up)
+	parent.app.input.hooks.add_hook('key_down', 'chip8_key_down', input.on_key_down)
 
 	return input
 }

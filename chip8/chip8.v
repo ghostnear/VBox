@@ -4,7 +4,9 @@ module chip8
 // https://github.com/chip-8/extensions
 // https://github.com/trapexit/chip-8_documentation
 import app
+import sdl
 import time
+import term
 
 // Virtual machine config.
 pub struct VMConfig {
@@ -32,7 +34,7 @@ mut:
 
 // Creates a new instance of the VM.
 [inline]
-pub fn new_vm(cfg VMConfig, parent &app.App) &VM {
+pub fn new_vm(cfg VMConfig, mut parent app.App) &VM {
 	// TODO: use configs and subsystems like for gfx
 	mut v := &VM{
 		app: parent
@@ -55,6 +57,9 @@ pub fn new_vm(cfg VMConfig, parent &app.App) &VM {
 	// Load the ROM
 	v.load_rom(cfg.rom_path)
 
+	// Sink the hooks in
+	parent.hooks.add_hook('draw', 'chip8', v.draw)
+
 	return v
 }
 
@@ -67,6 +72,33 @@ pub fn (mut self VM) start() {
 		self.emulation_thread = &(spawn self.internal_loop())
 		self.cpu.execution_flag = true
 		self.cpu.halt_flag = false
+	}
+}
+
+// Draws to the screen.
+pub fn (mut self VM) draw(args voidptr) {
+	match self.app.gfx.display_mode {
+		// Print all in terminal.
+		.terminal {
+			for y := 0; y < self.gfx.size.y; y++ {
+				mut line := ''
+				for x := 0; x < self.gfx.size.x; x++ {
+					if self.gfx.get_pixel(x, y) == 1 {
+						line += term.rgb(255, 135, 125, '█')
+					} else {
+						line += term.bg_rgb(10, 10, 10, ' ')
+					}
+				}
+				println(line)
+			}
+		}
+		// Draw the SDL texture to the screen
+		.sdl {
+			sdl.render_copy(self.app.gfx.sdl_renderer, self.gfx.sdl_display, sdl.null,
+				sdl.null)
+		}
+		// This shouldn't happen.
+		else {}
 	}
 }
 
@@ -127,7 +159,7 @@ fn (mut self VM) internal_loop() {
 			self.tim.emulation_dt -= 1e+9 / self.emulation_speed
 		}
 
-		// Do drawing only if required
+		// Do rendering only if required
 		if self.gfx.draw_flag {
 			self.gfx.render()
 			self.gfx.draw_flag = false

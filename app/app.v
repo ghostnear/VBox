@@ -22,7 +22,7 @@ pub struct AppConfig {
 pub mut:
 	gfx_config GraphicsConfig = GraphicsConfig{
 		window_title: 'VBox ' + app.app_version
-		display_mode: .other
+		display_mode: .terminal
 	}
 }
 
@@ -35,6 +35,13 @@ pub mut:
 	gfx     Graphics
 	input   Input
 	locale  string = 'en'
+	hooks   utils.HookManager
+}
+
+// Stops the current thread till next frame needs to be computed.
+pub fn (self App) wait_for_next_frame() {
+	// TODO: this thing should have an actual update time, depending on the UI type. Or configurable.
+	time.sleep(1e+9 / 60.0)
 }
 
 [inline]
@@ -51,14 +58,14 @@ pub fn new_app(cfg AppConfig) &App {
 	os.mkdir('logs') or {}
 
 	// Check if there are 5 logs already, if so, delete the first one chronologically.
-	mut files := os.ls('./logs/') or { [''] } // This should already exist, so no errors.
+	mut files := os.ls('./logs/') or { [''] }
 	for files.len >= 5 {
-		os.rm('./logs/' + files[0]) or {} // Should work most of the times, unless the file is read only (shouldn't be the case).
+		os.rm('./logs/' + files[0]) or {}
 		files = files[1..files.len]
 	}
-	a.log.set_full_logpath('./logs/' + time.now().str().replace(' ', '_').replace(':', '-') + '.log')
 
-	// Log app data
+	// Start logging app data.
+	a.log.set_full_logpath('./logs/' + time.now().str().replace(' ', '_').replace(':', '-') + '.log')
 	a.log.info(locale.get_string(a.locale, 'info_log_session_info'))
 	a.log.info(locale.get_string(a.locale, 'info_log_app_version') + app.app_version)
 	a.log.info(locale.get_string(a.locale, 'info_log_language_name') + a.locale + ' (' +
@@ -66,7 +73,7 @@ pub fn new_app(cfg AppConfig) &App {
 	a.log.info(locale.get_string(a.locale, 'info_log_compiled_with') + version.full_v_version(true))
 	a.log.info('-------------------------------')
 
-	// Stuff that can generate errors goes here.
+	// Start intiializing everything properly.
 	a.gfx = new_gfx(cfg.gfx_config, a) or {
 		term.clear()
 		utils.print_fatal_error(a.locale, err.str())
@@ -84,9 +91,28 @@ pub fn new_app(cfg AppConfig) &App {
 	return a
 }
 
+// Returns true if the app is still running.
 [inline]
 pub fn (self App) is_running() bool {
 	return self.running
+}
+
+pub fn draw(mut self App) {
+	self.hooks.call_all_hooks('draw', sdl.null)
+
+	match self.gfx.display_mode {
+		// Reset the cursor position to top left and make sure cursor is hidden.
+		.terminal {
+			term.hide_cursor()
+			term.set_cursor_position(x: 0, y: 0)
+		}
+		// Update the display
+		.sdl {
+			sdl.render_present(self.gfx.sdl_renderer)
+		}
+		// This shouldn't happen.
+		else {}
+	}
 }
 
 [inline]

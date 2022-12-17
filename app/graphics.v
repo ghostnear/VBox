@@ -35,11 +35,11 @@ pub mut:
 	sdl_renderer &sdl.Renderer = sdl.null
 }
 
-fn (self &Graphics) destroy() ?bool {
+fn (self Graphics) destroy() ?bool {
 	// Do different stuff depending on the display driver.
 	match self.display_mode {
 		.terminal {
-			// Clear the terminal and hide the cursor.
+			// Clear the terminal.
 			term.clear()
 		}
 		.sdl {
@@ -86,7 +86,7 @@ fn new_gfx(cfg GraphicsConfig, parent &App) ?&Graphics {
 			}
 
 			// Create renderer
-			gfx.sdl_renderer = sdl.create_renderer(gfx.sdl_window, -1, u32(sdl.RendererFlags.accelerated) | u32(sdl.RendererFlags.presentvsync))
+			gfx.sdl_renderer = sdl.create_renderer(gfx.sdl_window, -1, u32(sdl.RendererFlags.accelerated) | u32(sdl.RendererFlags.presentvsync) | u32(sdl.RendererFlags.targettexture))
 			if gfx.sdl_renderer == sdl.null {
 				return error(locale.get_string(parent.locale, 'message_sdl_could_not_create_renderer'))
 			}

@@ -1,10 +1,7 @@
 import app
-import time
 import chip8
 
 fn main() {
-	// BIG TODO: abstracticize everything so it is all nice and neat.
-
 	// Instantiate app using default config.
 	mut config := app.AppConfig{
 		gfx_config: app.GraphicsConfig{
@@ -18,9 +15,7 @@ fn main() {
 	mut vm_config := chip8.VMConfig{
 		rom_path: 'roms/chip8/games/Pong 2 (Pong hack) [David Winter, 1997].ch8'
 	}
-	mut chip8_vm := chip8.new_vm(vm_config, app_instance)
-
-	// Start the emulation thread and wait for it to finish.
+	mut chip8_vm := chip8.new_vm(vm_config, mut app_instance)
 	chip8_vm.start()
 
 	// Main loop
@@ -30,11 +25,11 @@ fn main() {
 			break
 		}
 
-		// Do input.
+		// Do all the app things.
 		app.poll_events(mut app_instance)
-
-		// Update 60 times a second just to be sure.
-		// TODO: this thing should have an actual update time, depending on the UI type. Or configurable.
-		time.sleep(1e+9 / 60.0)
+		app.draw(mut app_instance)
+		app_instance.wait_for_next_frame()
 	}
+
+	chip8_vm.destroy()
 }

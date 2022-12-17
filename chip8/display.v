@@ -1,5 +1,6 @@
 module chip8
 
+import sdl
 import term
 import utilities as utils
 
@@ -11,10 +12,12 @@ mut:
 [heap]
 struct Display {
 mut:
-	vm        &VM = unsafe { nil }
-	draw_flag bool
-	size      utils.Vec2[int]
-	buffer    []u8
+	vm             &VM = unsafe { nil }
+	draw_flag      bool
+	size           utils.Vec2[int]
+	buffer         []u8
+	sdl_display    &sdl.Texture = sdl.null
+	sdl_backbuffer &sdl.Texture = sdl.null
 }
 
 [inline]
@@ -40,25 +43,28 @@ pub fn (mut self Display) xor_pixel(pos_x int, pos_y int) int {
 // For SDL it is an SDL_Texture, for terminal it is the IO.
 pub fn (mut self Display) render() {
 	match self.vm.app.gfx.display_mode {
-		// Print directly to the screen.
-		.terminal {
-			term.hide_cursor()
-			term.set_cursor_position(x: 0, y: 0)
-			for y := 0; y < self.size.y; y++ {
-				mut line := ''
-				for x := 0; x < self.size.x; x++ {
-					if self.get_pixel(x, y) == 1 {
-						line += term.rgb(255, 135, 125, '█')
-					} else {
-						line += term.bg_rgb(10, 10, 10, ' ')
+		// Do nothing.
+		.terminal {}
+		// Lock the SDL_Texture and update it accordingly.
+		.sdl {
+			if self.sdl_display != sdl.null {
+				sdl.set_render_target(self.vm.app.gfx.sdl_renderer, self.sdl_display)
+				println(cstring_to_vstring(sdl.get_error()))
+				for y := 0; y < self.size.y; y++ {
+					for x := 0; x < self.size.x; x++ {
+						if self.get_pixel(x, y) == 1 {
+							sdl.set_render_draw_color(self.vm.app.gfx.sdl_renderer, 0xFF,
+								0xFF, 0xFF, 0xFF)
+						} else {
+							sdl.set_render_draw_color(self.vm.app.gfx.sdl_renderer, 0x00,
+								0x00, 0x00, 0x00)
+						}
+						sdl.render_draw_point(self.vm.app.gfx.sdl_renderer, x, y)
 					}
 				}
-				println(line)
+				sdl.set_render_target(self.vm.app.gfx.sdl_renderer, sdl.null)
 			}
 		}
-		// Lock the SDL_Texture and update it accordingly.
-		// TODO
-		.sdl {}
 		// This shouldn't happen.
 		else {}
 	}
@@ -70,7 +76,26 @@ pub fn (mut self Display) resize(newSize utils.Vec2[int]) {
 	self.draw_flag = true
 	self.buffer = []u8{len: self.size.x * self.size.y / 8, cap: self.size.x * self.size.y / 8, init: 0}
 
-	// TODO: do stuff to the display depending on the output (resize texture for SDL or clear screen for terminal)
+	// Recreate displays
+	match self.vm.app.gfx.display_mode {
+		// Clear terminal screen
+		.terminal {
+			term.clear()
+		}
+		// Create new SDL texture with the needed screen size.
+		.sdl {
+			if self.vm.app.gfx.sdl_renderer != sdl.null {
+				if self.sdl_display != sdl.null {
+					sdl.destroy_texture(self.sdl_display)
+				}
+				self.sdl_display = sdl.create_texture(self.vm.app.gfx.sdl_renderer, .rgb888,
+					sdl.TextureAccess.target, newSize.x, newSize.y)
+				println(cstring_to_vstring(sdl.get_error()))
+			}
+		}
+		// Do nothing.
+		else {}
+	}
 }
 
 pub fn (mut self Display) clear() {
