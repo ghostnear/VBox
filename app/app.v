@@ -22,7 +22,7 @@ pub struct AppConfig {
 pub mut:
 	gfx_config GraphicsConfig = GraphicsConfig{
 		window_title: 'VBox ' + app.app_version
-		display_mode: .terminal
+		display_mode: .other
 	}
 }
 
@@ -33,7 +33,7 @@ pub mut:
 	running bool = true
 	log     log.Log
 	gfx     Graphics
-	input   Input
+	inp     Input
 	locale  string = 'en'
 	hooks   utils.HookManager
 }
@@ -41,7 +41,7 @@ pub mut:
 // Stops the current thread till next frame needs to be computed.
 pub fn (self App) wait_for_next_frame() {
 	// TODO: this thing should have an actual update time, depending on the UI type. Or configurable.
-	time.sleep(1e+9 / 60.0)
+	time.sleep(1e+9 / 30.0)
 }
 
 [inline]
@@ -80,6 +80,7 @@ pub fn new_app(cfg AppConfig) &App {
 		a.log.error(err.str())
 		exit(-1)
 	}
+	a.inp = new_input(a)
 
 	// Init complete.
 	a.log.info(locale.get_string(a.locale, 'info_log_init_properly'))

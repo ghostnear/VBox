@@ -6,14 +6,14 @@ fn main() {
 	mut config := app.AppConfig{
 		gfx_config: app.GraphicsConfig{
 			window_title: 'VBox v ' + app.app_version
-			display_mode: .terminal
+			display_mode: .sdl
 		}
 	}
 	mut app_instance := app.new_app(config)
 
 	// Instantiate VM using default config.
 	mut vm_config := chip8.VMConfig{
-		rom_path: 'roms/chip8/games/Pong 2 (Pong hack) [David Winter, 1997].ch8'
+		rom_path: 'roms/chip8/demos/Maze (alt) [David Winter, 199x].ch8'
 	}
 	mut chip8_vm := chip8.new_vm(vm_config, mut app_instance)
 	chip8_vm.start()

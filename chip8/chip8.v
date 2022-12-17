@@ -84,9 +84,9 @@ pub fn (mut self VM) draw(args voidptr) {
 				mut line := ''
 				for x := 0; x < self.gfx.size.x; x++ {
 					if self.gfx.get_pixel(x, y) == 1 {
-						line += term.rgb(255, 135, 125, '█')
+						line += term.rgb(0xAA, 0xAA, 0xAA, '█')
 					} else {
-						line += term.bg_rgb(10, 10, 10, ' ')
+						line += term.bg_rgb(0x11, 0x11, 0x11, ' ')
 					}
 				}
 				println(line)

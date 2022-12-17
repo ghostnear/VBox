@@ -12,11 +12,11 @@ mut:
 [heap]
 struct Display {
 mut:
-	vm             &VM = unsafe { nil }
-	draw_flag      bool
-	size           utils.Vec2[int]
-	buffer         []u8
-	sdl_display    &sdl.Texture = sdl.null
+	vm          &VM = unsafe { nil }
+	draw_flag   bool
+	size        utils.Vec2[int]
+	buffer      []u8
+	sdl_display &sdl.Texture = sdl.null
 }
 
 [inline]
@@ -51,11 +51,11 @@ pub fn (mut self Display) render() {
 				for y := 0; y < self.size.y; y++ {
 					for x := 0; x < self.size.x; x++ {
 						if self.get_pixel(x, y) == 1 {
-							sdl.set_render_draw_color(self.vm.app.gfx.sdl_renderer, 0xFF,
-								0xFF, 0xFF, 0xFF)
+							sdl.set_render_draw_color(self.vm.app.gfx.sdl_renderer, 0xAA,
+								0xAA, 0xAA, 0xFF)
 						} else {
-							sdl.set_render_draw_color(self.vm.app.gfx.sdl_renderer, 0x00,
-								0x00, 0x00, 0x00)
+							sdl.set_render_draw_color(self.vm.app.gfx.sdl_renderer, 0x11,
+								0x11, 0x11, 0xFF)
 						}
 						sdl.render_draw_point(self.vm.app.gfx.sdl_renderer, x, y)
 					}

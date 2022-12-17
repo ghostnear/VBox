@@ -21,7 +21,6 @@ pub fn (mut self Timers) update() {
 	self.hardware_dt += self.hardware_timer.elapsed().nanoseconds()
 
 	// Update the timer registers.
-	// ENHANCEME: use divisions somehow?
 	for self.hardware_dt > 1.e9 / 60.0 {
 		if self.dt > 0 {
 			self.dt -= 1

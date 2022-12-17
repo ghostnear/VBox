@@ -9,6 +9,7 @@ fn unknown_opcode(mut self CPU, opcode u16) {
 	self.pc -= 2
 	self.parent.app.log.error('Fatal Error: Unknown instruction at address ${self.pc:04X}!')
 	self.parent.app.log.error('Value of opcode is: ${opcode:04X}!')
+	self.parent.app.log.flush()
 	self.execution_flag = false
 }
 
@@ -46,6 +47,7 @@ fn (mut self CPU) generate_execution_table() {
 		if self.pc == opcode & 0xFFF + 2 {
 			self.parent.app.log.warn('Warning: Found infinite jump at address ${self.pc - 2:04X}!')
 			self.parent.app.log.info('Pausing execution!')
+			self.parent.app.log.flush()
 			self.halt_flag = true
 		}
 
