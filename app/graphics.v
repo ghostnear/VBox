@@ -3,6 +3,7 @@ module app
 import sdl
 import term
 import locale
+import utilities as utils
 
 pub enum DisplayMode {
 	other
@@ -20,8 +21,8 @@ pub fn (self DisplayMode) str() string {
 
 pub struct GraphicsConfig {
 pub mut:
-	width        int         = 960
-	height       int         = 540
+	width        int         = 640
+	height       int         = 320
 	window_title string      = 'VBox'
 	display_mode DisplayMode = .other
 }
@@ -29,10 +30,10 @@ pub mut:
 [heap]
 struct Graphics {
 pub mut:
-	parent       &App = unsafe { nil }
-	display_mode DisplayMode
-	sdl_window   &sdl.Window   = sdl.null
-	sdl_renderer &sdl.Renderer = sdl.null
+	parent       	&App = unsafe { nil }
+	display_mode 	DisplayMode
+	sdl_window   	&sdl.Window   = sdl.null
+	sdl_renderer 	&sdl.Renderer = sdl.null
 }
 
 fn (self Graphics) destroy() ?bool {
@@ -82,13 +83,13 @@ fn new_gfx(cfg GraphicsConfig, parent &App) ?&Graphics {
 			gfx.sdl_window = sdl.create_window(cfg.window_title.str, sdl.windowpos_centered,
 				sdl.windowpos_centered, cfg.width, cfg.height, 0)
 			if gfx.sdl_window == sdl.null {
-				return error(locale.get_string(parent.locale, 'message_sdl_could_not_create_window'))
+				return error(locale.get_string(parent.locale, 'message_sdl_could_not_create_window') + " " + utils.get_sdl_error())
 			}
 
 			// Create renderer
 			gfx.sdl_renderer = sdl.create_renderer(gfx.sdl_window, -1, u32(sdl.RendererFlags.accelerated) | u32(sdl.RendererFlags.presentvsync) | u32(sdl.RendererFlags.targettexture))
 			if gfx.sdl_renderer == sdl.null {
-				return error(locale.get_string(parent.locale, 'message_sdl_could_not_create_renderer'))
+				return error(locale.get_string(parent.locale, 'message_sdl_could_not_create_renderer') + " " + utils.get_sdl_error())
 			}
 		}
 		else {

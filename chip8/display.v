@@ -17,7 +17,6 @@ mut:
 	size           utils.Vec2[int]
 	buffer         []u8
 	sdl_display    &sdl.Texture = sdl.null
-	sdl_backbuffer &sdl.Texture = sdl.null
 }
 
 [inline]
@@ -49,7 +48,6 @@ pub fn (mut self Display) render() {
 		.sdl {
 			if self.sdl_display != sdl.null {
 				sdl.set_render_target(self.vm.app.gfx.sdl_renderer, self.sdl_display)
-				println(cstring_to_vstring(sdl.get_error()))
 				for y := 0; y < self.size.y; y++ {
 					for x := 0; x < self.size.x; x++ {
 						if self.get_pixel(x, y) == 1 {
@@ -84,14 +82,11 @@ pub fn (mut self Display) resize(newSize utils.Vec2[int]) {
 		}
 		// Create new SDL texture with the needed screen size.
 		.sdl {
-			if self.vm.app.gfx.sdl_renderer != sdl.null {
-				if self.sdl_display != sdl.null {
-					sdl.destroy_texture(self.sdl_display)
-				}
-				self.sdl_display = sdl.create_texture(self.vm.app.gfx.sdl_renderer, .rgb888,
-					sdl.TextureAccess.target, newSize.x, newSize.y)
-				println(cstring_to_vstring(sdl.get_error()))
+			if self.sdl_display != sdl.null {
+				sdl.destroy_texture(self.sdl_display)
 			}
+			self.sdl_display = sdl.create_texture(self.vm.app.gfx.sdl_renderer, .rgb888,
+				sdl.TextureAccess.target, newSize.x, newSize.y)
 		}
 		// Do nothing.
 		else {}

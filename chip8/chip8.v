@@ -134,11 +134,13 @@ pub fn (mut self VM) load_rom(path string) {
 }
 
 // Steps the CPU once, useful for debugging
+[inline]
 fn (mut self VM) step_once() {
 	self.cpu.step(mut self)
 }
 
 // Steps the CPU for an arbitrary number of instructions, useful for the same debugging.
+[inline]
 pub fn (mut self VM) step_multiple_times(times int) {
 	for index := times; index > 0; index-- {
 		self.step_once()
