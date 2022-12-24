@@ -69,7 +69,7 @@ pub fn (mut self VM) start() {
 	// Only if we don't have a thread already active start and set the flag.
 	// If used coretly, it's very likely that this is true.
 	if _likely_(self.emulation_thread == unsafe { nil }) {
-		self.emulation_thread = &(spawn self.internal_loop())
+		self.emulation_thread = &(go self.internal_loop())
 		self.cpu.execution_flag = true
 		self.cpu.halt_flag = false
 	}

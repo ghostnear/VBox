@@ -3,6 +3,9 @@ roms/
 logs/
 
 # Ignore built files
+build/
+build
+run
 *.exe
 *.dll
 *.log
