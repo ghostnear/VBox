@@ -77,6 +77,13 @@ pub fn (mut self VM) start() {
 
 // Draws to the screen.
 pub fn (mut self VM) draw(args voidptr) {
+
+	// Do rendering if required
+	if self.gfx.draw_flag {
+		self.gfx.render()
+		self.gfx.draw_flag = false
+	}
+
 	match self.app.gfx.display_mode {
 		// Print all in terminal.
 		.terminal {
@@ -159,12 +166,6 @@ fn (mut self VM) internal_loop() {
 			&& self.cpu.execution_flag) {
 			self.step_once()
 			self.tim.emulation_dt -= 1e+9 / self.emulation_speed
-		}
-
-		// Do rendering only if required
-		if self.gfx.draw_flag {
-			self.gfx.render()
-			self.gfx.draw_flag = false
 		}
 
 		// Sleep till next instruction

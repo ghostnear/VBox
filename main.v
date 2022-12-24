@@ -13,7 +13,7 @@ fn main() {
 
 	// Instantiate VM using default config.
 	mut vm_config := chip8.VMConfig{
-		rom_path: 'roms/chip8/demos/Maze (alt) [David Winter, 199x].ch8'
+		rom_path: 'roms/chip8/games/Pong (1 player).ch8'
 	}
 	mut chip8_vm := chip8.new_vm(vm_config, mut app_instance)
 	chip8_vm.start()
