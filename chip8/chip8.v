@@ -40,11 +40,11 @@ pub fn new_vm(cfg VMConfig, mut parent app.App) &VM {
 		app: parent
 		emulation_speed: 300.0
 		tim: new_tim()
-		mem: new_mem()
 	}
 
 	// Initialise subsystems
 	v.cpu = new_cpu(v)
+	v.mem = new_mem(v)
 	v.inp = new_inp(cfg.inp_config, mut v)
 	v.gfx = new_dsp(cfg.gfx_config, v)
 

@@ -4,6 +4,7 @@ module chip8
 [heap]
 struct Memory {
 mut:
+	parent	&VM = unsafe { nil }
 	ram []u8
 }
 
@@ -29,9 +30,8 @@ pub fn (mut self Memory) copy_bytes(offset u16, bytes []u8) {
 // Loads a ROM to the memory at the specified offset.
 pub fn (mut self Memory) load_rom(rom ROM) {
 	if rom.data.len > 0 {
-		println('Loaded ROM with length ${rom.data.len} bytes!')
-
-		// TODO: use the logs for this.
+		self.parent.app.log.info("Executable loaded successfully!")
+		rom.log(mut self.parent.app.log)
 		self.copy_bytes(0x200, rom.data)
 	}
 }
@@ -44,8 +44,9 @@ pub fn (self Memory) fetch_word(address u16) u16 {
 
 // Creates a new memory instance
 [inline]
-fn new_mem() &Memory {
+fn new_mem(parent &VM) &Memory {
 	mut mem := &Memory{
+		parent: parent
 		ram: []u8{len: 0x10000, cap: 0x10000, init: 0}
 	}
 	return mem
