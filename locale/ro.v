@@ -10,7 +10,7 @@ const map_ro = {
 	'info_log_exit_properly':                'Aplicația a fost închisă cu success.'
 	'info_log_init_properly':                'Aplicația a fost inițializată cu success.'
 	'message_check_logfile':                 'Verifică log-ul din folderul executabilului pentru mai multe informații.'
-	'message_fatal_error_title':             'Eroare fatală: '
+	'message_fatal_error_title':             'Eroare fatală: %s'
 	'message_unknown_graphics_selected':     'Mod de display necunoscut!'
 	'message_sdl_could_not_create_window':   'Nu a putut fi creată fereastra folosind SDL!'
 	'message_sdl_could_not_create_renderer': 'Nu a putut fi creat renderer-ul folosind SDL!'
