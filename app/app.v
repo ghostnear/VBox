@@ -67,10 +67,12 @@ pub fn new_app(cfg AppConfig) &App {
 	// Start logging app data.
 	a.log.set_full_logpath('./logs/' + time.now().str().replace(' ', '_').replace(':', '-') + '.log')
 	a.log.info(locale.get_string(a.locale, 'info_log_session_info'))
-	a.log.info(locale.get_string(a.locale, 'info_log_app_version') + app.app_version)
-	a.log.info(locale.get_string(a.locale, 'info_log_language_name') + a.locale + ' (' +
-		locale.get_string(a.locale, 'language_name') + ')')
-	a.log.info(locale.get_string(a.locale, 'info_log_compiled_with') + version.full_v_version(true))
+	a.log.info(locale.get_format_string(a.locale, 'info_log_app_version', app.app_version))
+	lang_name := locale.get_string(a.locale, 'language_name')
+	a.log.info(locale.get_format_string(a.locale, 'info_log_language_name', a.locale,
+		lang_name))
+	v_version := version.full_v_version(true)
+	a.log.info(locale.get_format_string(a.locale, 'info_log_compiled_with', v_version))
 	a.log.info('-------------------------------')
 
 	// Start intiializing everything properly.

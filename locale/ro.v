@@ -3,10 +3,10 @@ module locale
 const map_ro = {
 	'language_name':                         'Română'
 	'info_log_quitting':                     'Aplicația se închide...'
-	'info_log_app_version':                  'Versiune: '
+	'info_log_app_version':                  'Versiune: %s'
 	'info_log_session_info':                 'Informație despre sesiune:'
-	'info_log_compiled_with':                'Compilat folosind '
-	'info_log_language_name':                'Limba: '
+	'info_log_compiled_with':                'Compilat folosind %s'
+	'info_log_language_name':                'Limba: %s (%s)'
 	'info_log_exit_properly':                'Aplicația a fost închisă cu success.'
 	'info_log_init_properly':                'Aplicația a fost inițializată cu success.'
 	'message_check_logfile':                 'Verifică log-ul din folderul executabilului pentru mai multe informații.'

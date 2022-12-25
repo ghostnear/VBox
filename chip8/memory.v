@@ -4,8 +4,8 @@ module chip8
 [heap]
 struct Memory {
 mut:
-	parent	&VM = unsafe { nil }
-	ram []u8
+	parent &VM = unsafe { nil }
+	ram    []u8
 }
 
 // Fetches a byte from the memory at the specified address.
@@ -30,7 +30,7 @@ pub fn (mut self Memory) copy_bytes(offset u16, bytes []u8) {
 // Loads a ROM to the memory at the specified offset.
 pub fn (mut self Memory) load_rom(rom ROM) {
 	if rom.data.len > 0 {
-		self.parent.app.log.info("Executable loaded successfully!")
+		self.parent.app.log.info('Executable loaded successfully!')
 		rom.log(mut self.parent.app.log)
 		self.copy_bytes(0x200, rom.data)
 	}

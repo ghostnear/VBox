@@ -15,6 +15,6 @@ if !os.exists(const_paths['windows']) && !os.exists(const_paths['linux']) {
 	os.system(const_build_paths)
 }
 
-os.chdir("..")!
-os.chdir("build")!
+os.chdir('..')!
+os.chdir('build')!
 os.system(const_paths[os.user_os()])

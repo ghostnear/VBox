@@ -11,17 +11,16 @@ mut:
 	data []u8
 }
 
-pub fn (self ROM) log(mut logger log.Log)
-{
+pub fn (self ROM) log(mut logger log.Log) {
 	// TODO: translate
-	logger.info("File data:\nPath: ${ self.path }\nSize: ${ self.data.len }")
+	logger.info('File data:\nPath: ${self.path}\nSize: ${self.data.len}')
 }
 
 // TODO: rewrite this using optionals so we can abort excecution in case of failure
 pub fn (mut self ROM) load_from_file(path string) {
 	// Check if file exists and can be opened.
 	mut rom_file := os.open(path) or {
-		println("Couldn't open file at path ${path}!")	// TODO: translate
+		println("Couldn't open file at path ${path}!") // TODO: translate
 
 		// TODO: Use the logs for this as well.
 		return
@@ -31,7 +30,7 @@ pub fn (mut self ROM) load_from_file(path string) {
 	rom_size := os.file_size(path)
 	if _unlikely_(rom_size >= 0x10000) {
 		rom_file.close()
-		println('ROM file at path ${path} is too big to be a CHIP8 ROM!')	// TODO: translate
+		println('ROM file at path ${path} is too big to be a CHIP8 ROM!') // TODO: translate
 
 		// TODO: use logs.
 		return
