@@ -11,14 +11,6 @@ pub enum DisplayMode {
 	sdl
 }
 
-pub fn (self DisplayMode) str() string {
-	match self {
-		.terminal { return 'terminal' }
-		.sdl { return 'sdl' }
-		else { return '?' }
-	}
-}
-
 pub struct GraphicsConfig {
 pub mut:
 	width        int         = 640
@@ -61,15 +53,12 @@ fn (self Graphics) destroy() ?bool {
 	return true
 }
 
+// Create a graphics instance using the specified configuration.
 fn new_gfx(cfg GraphicsConfig, parent &App) ?&Graphics {
-	// Init the graphics with the settings from the config.
 	mut gfx := &Graphics{
 		parent: parent
 		display_mode: cfg.display_mode
 	}
-
-	// Init SDL stuff (everything is required as some stuff are used even without windowed display)
-	sdl.init(sdl.init_everything)
 
 	// Do different stuff depending on the display driver.
 	match cfg.display_mode {
@@ -79,6 +68,9 @@ fn new_gfx(cfg GraphicsConfig, parent &App) ?&Graphics {
 			term.set_terminal_title(cfg.window_title)
 		}
 		.sdl {
+			// Init everything SDL related.
+			sdl.init(sdl.init_everything)
+
 			// Create window
 			gfx.sdl_window = sdl.create_window(cfg.window_title.str, sdl.windowpos_centered,
 				sdl.windowpos_centered, cfg.width, cfg.height, 0)

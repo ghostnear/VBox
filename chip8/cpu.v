@@ -23,7 +23,7 @@ pub mut:
 	stack []u16
 }
 
-// Steps the CPU one instruction in.
+// Steps the CPU one instruction at a time.
 pub fn (mut self CPU) step(mut parent VM) {
 	opcode_value := self.parent.mem.fetch_word(self.pc)
 	self.execute_opcode(opcode_value)
@@ -32,12 +32,11 @@ pub fn (mut self CPU) step(mut parent VM) {
 // Directly executes an encoded opcode.
 [inline]
 pub fn (mut self CPU) execute_opcode(opcode u16) {
-	// Advance PC
 	self.pc += 2
 	self.instruction_table[(opcode & 0xF000) >> 12](self, opcode)
 }
 
-// Creates a new CPU instance.
+// Creates a new CPU instance from the specified config.
 [inline]
 fn new_cpu(parent &VM) &CPU {
 	// TODO: CPU config

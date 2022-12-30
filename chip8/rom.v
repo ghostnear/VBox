@@ -11,12 +11,14 @@ mut:
 	data []u8
 }
 
+// Convert the ROM metadata to a string.
+// TODO: this.
 pub fn (self ROM) log(mut logger log.Log) {
-	// TODO: translate
+	// TODO: also translate
 	logger.info('File data:\nPath: ${self.path}\nSize: ${self.data.len}')
 }
 
-// TODO: rewrite this using optionals so we can abort excecution in case of failure
+// TODO: rewrite this using optionals so we can abort excecution in case of failure.
 pub fn (mut self ROM) load_from_file(path string) {
 	// Check if file exists and can be opened.
 	mut rom_file := os.open(path) or {

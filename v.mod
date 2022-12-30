@@ -1,7 +1,7 @@
 Module {
 	name: 'vbox'
-	description: 'CHIP8 emulator written in V.'
-	version: '0.0.1'
+	description: 'Multiplatform emulator written in V.'
+	version: '0.1.0'
 	license: 'MIT'
 	dependencies: []
 }

@@ -1,5 +1,7 @@
 module chip8
 
+// TODO: replace this with a binary file and using the $embed_file() preprocessor.
+
 const font_lowres = [
 	u8(0xF0),
 	0x90,

@@ -1,5 +1,6 @@
 module locale
 
+// Dicționar folosit pentru string-urile din limba Română.
 const map_ro = {
 	'language_name':                         'Română'
 	'info_log_quitting':                     'Aplicația se închide...'

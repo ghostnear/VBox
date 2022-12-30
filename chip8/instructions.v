@@ -29,7 +29,7 @@ fn (mut self CPU) generate_execution_table() {
 	}
 
 	/*
-	All instructions (based on their start)
+	*	All instructions (based on their start)
 	*/
 
 	// Send to the system opcodes table
@@ -148,7 +148,7 @@ fn (mut self CPU) generate_execution_table() {
 	}
 
 	/*
-	System instructions (start with 0x00)
+	* System instructions (start with 0x00)
 	*/
 
 	// CLS
@@ -163,7 +163,7 @@ fn (mut self CPU) generate_execution_table() {
 	}
 
 	/*
-	Keyboard instructions (start with 0xE)
+	* Keyboard instructions (start with 0xE)
 	*/
 
 	// SKP VX
@@ -181,7 +181,7 @@ fn (mut self CPU) generate_execution_table() {
 	}
 
 	/*
-	Register instructions (start with 0x5)
+	* Register instructions (start with 0x5)
 	*/
 
 	// SE VX, VY
@@ -192,7 +192,7 @@ fn (mut self CPU) generate_execution_table() {
 	}
 
 	/*
-	Register arithmetic instructions (start with 0x8)
+	* Register arithmetic instructions (start with 0x8)
 	*/
 
 	// LD VX, VY
@@ -248,7 +248,7 @@ fn (mut self CPU) generate_execution_table() {
 	}
 
 	/*
-	Special instructions (start with 0xF)
+	* Special instructions (start with 0xF)
 	*/
 
 	// LD Vx, DT

@@ -34,32 +34,41 @@ pub mut:
 
 pub fn (mut self Input) on_key_down(key voidptr) {
 	keycode := *(&sdl.KeyCode(key))
-	for index, keyvalue in self.keybind {
+	// TODO: figure out why this doesnt work right?
+	mut index := 0
+	for keyvalue in self.keybind {
 		if keycode == keyvalue {
 			self.keys[index / 8] |= 1 << (index % 8)
 		}
+		index++
 	}
 }
 
 pub fn (mut self Input) on_key_up(key voidptr) {
 	keycode := *(&sdl.KeyCode(key))
-	for index, keyvalue in self.keybind {
+	// TODO: figure out why this doesnt work right?
+	mut index := 0
+	for keyvalue in self.keybind {
 		if keycode == keyvalue {
 			self.keys[index / 8] &= ~(1 << (index % 8))
 		}
+		index++
 	}
 }
 
 pub fn (mut self Input) destroy() {
+	// Remove hooks on app destroy.
 	self.parent.app.inp.hooks.remove_hook('key_up', 'chip8_key_up')
 	self.parent.app.inp.hooks.remove_hook('key_up', 'chip8_key_down')
 }
 
+// Checks if a key has been pressed.
 [inline]
 pub fn (self Input) is_pressed(keyIndex u8) bool {
 	return self.keys[keyIndex / 8] & (1 << (keyIndex % 8)) != 0
 }
 
+// Create a new CHIP8 input manager.
 [inline]
 pub fn new_inp(cfg InputConfig, mut parent VM) &Input {
 	input := &Input{

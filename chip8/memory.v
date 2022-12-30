@@ -23,7 +23,7 @@ pub fn (mut self Memory) save_byte(address u16, value u8) {
 // Copies an array of bytes directly to the memory at the specified offset.
 pub fn (mut self Memory) copy_bytes(offset u16, bytes []u8) {
 	for index := 0; index < bytes.len; index++ {
-		self.ram[offset + index] = bytes[index]
+		self.save_byte(offset + index, bytes[index])
 	}
 }
 
@@ -42,7 +42,7 @@ pub fn (self Memory) fetch_word(address u16) u16 {
 	return (u16(self.fetch_byte(address)) << 8) | self.fetch_byte(address + 1)
 }
 
-// Creates a new memory instance
+// Creates a new memory instance from the specified config.
 [inline]
 fn new_mem(parent &VM) &Memory {
 	mut mem := &Memory{

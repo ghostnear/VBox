@@ -1,5 +1,6 @@
 module locale
 
+// Constant map for the English language.
 const map_en = {
 	'language_name':                         'English'
 	'info_log_quitting':                     'Quitting app...'

@@ -2,7 +2,7 @@ module locale
 
 import strconv
 
-// All locales.
+// Map that contains all the implemented locales.
 const locales = {
 	'en': map_en
 	'ro': map_ro

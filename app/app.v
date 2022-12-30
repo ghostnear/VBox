@@ -9,9 +9,12 @@ import locale
 import v.util.version
 import utilities as utils
 
-pub const app_version_minor = '1'
+const error_exit_code = -1
 
-pub const app_version_middle = '0'
+// TODO: find a way to extract this from the vmod.
+pub const app_version_minor = '0'
+
+pub const app_version_middle = '1'
 
 pub const app_version_major = '0'
 
@@ -46,7 +49,6 @@ pub fn (self App) wait_for_next_frame() {
 
 [inline]
 pub fn new_app(cfg AppConfig) &App {
-	// Create app data.
 	mut a := &App{
 		log: log.Log{
 			output_target: .file
@@ -54,7 +56,10 @@ pub fn new_app(cfg AppConfig) &App {
 		}
 	}
 
-	// Create logging requirements.
+	// Execute this when app quits.
+	C.atexit(a.destroy)
+
+	// Create the log folder as it needs to exist before we can do anything.
 	os.mkdir('logs') or {}
 
 	// Check if there are 5 logs already, if so, delete the first one chronologically.
@@ -64,7 +69,10 @@ pub fn new_app(cfg AppConfig) &App {
 		files = files[1..files.len]
 	}
 
-	// Start logging app data.
+	/*
+	*	Start logging app data.
+	 *	This is the log header.
+	*/
 	a.log.set_full_logpath('./logs/' + time.now().str().replace(' ', '_').replace(':', '-') + '.log')
 	a.log.info(locale.get_string(a.locale, 'info_log_session_info'))
 	a.log.info(locale.get_format_string(a.locale, 'info_log_app_version', app.app_version))
@@ -80,16 +88,11 @@ pub fn new_app(cfg AppConfig) &App {
 		term.clear()
 		utils.print_fatal_error(a.locale, err.str())
 		a.log.error(err.str())
-		exit(-1)
+		exit(app.error_exit_code)
 	}
 	a.inp = new_input(a)
-
-	// Init complete.
 	a.log.info(locale.get_string(a.locale, 'info_log_init_properly'))
 	a.log.flush()
-
-	// Execute this when app quits.
-	C.atexit(a.destroy)
 
 	return a
 }
@@ -100,6 +103,7 @@ pub fn (self App) is_running() bool {
 	return self.running
 }
 
+// Main draw method of the app to be used in the main loop.
 pub fn draw(mut self App) {
 	self.hooks.call_all_hooks('draw', sdl.null)
 
@@ -118,24 +122,23 @@ pub fn draw(mut self App) {
 	}
 }
 
+// Called to exit the main loop.
 [inline]
 pub fn (mut self App) quit() {
-	// Stop app and save logs
 	self.running = false
 	self.log.info(locale.get_string(self.locale, 'info_log_quitting'))
 	self.log.flush()
 }
 
+// Free everything the app has allocated.
 [inline]
 pub fn (mut self App) destroy() {
 	// Destroy all graphics related data.
 	self.gfx.destroy() or {
 		self.log.error(err.str())
 		utils.print_fatal_error(self.locale, err.str())
-		exit(-1)
+		exit(app.error_exit_code)
 	}
-
-	// Quit SDL
 	sdl.quit()
 
 	// Log that exit has been done and make sure everything is flushed properly.

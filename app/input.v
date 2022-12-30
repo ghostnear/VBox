@@ -3,6 +3,7 @@ module app
 import sdl
 import utilities as utils
 
+[heap]
 pub struct Input {
 pub mut:
 	parent &App = unsafe { nil }
@@ -13,13 +14,13 @@ pub mut:
 pub fn (mut self Input) key_down(key sdl.KeyCode) {
 	self.hooks.call_all_hooks('key_down', &key)
 
-	// Define global keybinds here.
+	// TODO: Define global keybinds here if needed.
 }
 
 pub fn (mut self Input) key_up(key sdl.KeyCode) {
 	self.hooks.call_all_hooks('key_up', &key)
 
-	// Define global keybinds here.
+	// TODO: Define global keybinds here if needed.
 }
 
 pub fn poll_events(mut app App) {
@@ -32,18 +33,14 @@ pub fn poll_events(mut app App) {
 					.quit {
 						app.quit()
 					}
-					// Key has been pressed
+					// Key has been pressed.
 					.keydown {
-						// Get the keycode
 						key := unsafe { sdl.KeyCode(app.inp.event.key.keysym.sym) }
-
 						app.inp.key_down(key)
 					}
-					// Key has been released
+					// Key has been released.
 					.keyup {
-						// Get the keycode
 						key := unsafe { sdl.KeyCode(app.inp.event.key.keysym.sym) }
-
 						app.inp.key_up(key)
 					}
 					else {}
@@ -58,6 +55,7 @@ pub fn poll_events(mut app App) {
 	}
 }
 
+// Create an input instance using the provided configuration.
 pub fn new_input(parent &App) &Input {
 	v := &Input{
 		parent: parent
