@@ -3,10 +3,10 @@ module chip8
 // The documentations that were mainly used for this:
 // https://github.com/chip-8/extensions
 // https://github.com/trapexit/chip-8_documentation
-import app
 import sdl
 import time
 import term
+import core as app
 
 // Virtual machine config.
 pub struct VMConfig {

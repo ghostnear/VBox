@@ -1,15 +1,16 @@
-import app
-import chip8
+module main
+
+import core as app
+import emulators.chip8
 
 fn main() {
-	// Instantiate app using default config.
-	mut config := app.AppConfig{
-		gfx_config: app.GraphicsConfig{
-			window_title: 'VBox v ' + app.app_version
-			display_mode: .sdl
-		}
-	}
-	mut app_instance := app.new_app(config)
+	// Parse arguments
+	mut arg_parser := app.parse_arguments()
+
+	// Instantiate the app.
+	mut app_instance := app.new_app(app.fetch_app_config(arg_parser))
+
+	// TODO: (longtime) a 'No Game' screen if the settings wouldn't be set properly for an emulator to run.
 
 	// Instantiate VM using default config.
 	mut vm_config := chip8.VMConfig{
@@ -20,12 +21,12 @@ fn main() {
 
 	// Main loop
 	for app_instance.is_running() {
-		// TODO: do not stop until all threads are finished. Register the threads in the app context.
+		// TODO: do not stop until all threads are finished. Register the threads in the app context instead.
 		if _unlikely_(!chip8_vm.wait_for_finish()) {
 			break
 		}
 
-		// Do all the app things.
+		// Do all app things.
 		app.poll_events(mut app_instance)
 		app.draw(mut app_instance)
 		app_instance.wait_for_next_frame()

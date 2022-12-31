@@ -1,23 +1,9 @@
-module app
+module core
 
 import sdl
 import term
 import locale
 import utilities as utils
-
-pub enum DisplayMode {
-	other
-	terminal
-	sdl
-}
-
-pub struct GraphicsConfig {
-pub mut:
-	width        int         = 640
-	height       int         = 320
-	window_title string      = 'VBox'
-	display_mode DisplayMode = .other
-}
 
 [heap]
 struct Graphics {

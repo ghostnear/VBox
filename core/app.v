@@ -1,4 +1,4 @@
-module app
+module core
 
 import os
 import log
@@ -10,24 +10,6 @@ import v.util.version
 import utilities as utils
 
 const error_exit_code = -1
-
-// TODO: find a way to extract this from the vmod.
-pub const app_version_minor = '0'
-
-pub const app_version_middle = '1'
-
-pub const app_version_major = '0'
-
-pub const app_version = '${app_version_major}.${app_version_middle}.${app_version_minor}'
-
-// Struct that helps create the app.
-pub struct AppConfig {
-pub mut:
-	gfx_config GraphicsConfig = GraphicsConfig{
-		window_title: 'VBox ' + app.app_version
-		display_mode: .other
-	}
-}
 
 // Main struct that holds all app data.
 [heap]
@@ -59,6 +41,8 @@ pub fn new_app(cfg AppConfig) &App {
 	// Execute this when app quits.
 	C.atexit(a.destroy)
 
+	// TODO: logs should not have hardcoded paths.
+
 	// Create the log folder as it needs to exist before we can do anything.
 	os.mkdir('logs') or {}
 
@@ -75,7 +59,7 @@ pub fn new_app(cfg AppConfig) &App {
 	*/
 	a.log.set_full_logpath('./logs/' + time.now().str().replace(' ', '_').replace(':', '-') + '.log')
 	a.log.info(locale.get_string(a.locale, 'info_log_session_info'))
-	a.log.info(locale.get_format_string(a.locale, 'info_log_app_version', app.app_version))
+	a.log.info(locale.get_format_string(a.locale, 'info_log_app_version', app_version))
 	lang_name := locale.get_string(a.locale, 'language_name')
 	a.log.info(locale.get_format_string(a.locale, 'info_log_language_name', a.locale,
 		lang_name))
@@ -88,7 +72,7 @@ pub fn new_app(cfg AppConfig) &App {
 		term.clear()
 		utils.print_fatal_error(a.locale, err.str())
 		a.log.error(err.str())
-		exit(app.error_exit_code)
+		exit(core.error_exit_code)
 	}
 	a.inp = new_input(a)
 	a.log.info(locale.get_string(a.locale, 'info_log_init_properly'))
@@ -137,7 +121,7 @@ pub fn (mut self App) destroy() {
 	self.gfx.destroy() or {
 		self.log.error(err.str())
 		utils.print_fatal_error(self.locale, err.str())
-		exit(app.error_exit_code)
+		exit(core.error_exit_code)
 	}
 	sdl.quit()
 

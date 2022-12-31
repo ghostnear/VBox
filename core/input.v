@@ -1,4 +1,4 @@
-module app
+module core
 
 import sdl
 import utilities as utils
@@ -14,13 +14,13 @@ pub mut:
 pub fn (mut self Input) key_down(key sdl.KeyCode) {
 	self.hooks.call_all_hooks('key_down', &key)
 
-	// TODO: Define global keybinds here if needed.
+	// NOTE: Define global keybinds here if needed.
 }
 
 pub fn (mut self Input) key_up(key sdl.KeyCode) {
 	self.hooks.call_all_hooks('key_up', &key)
 
-	// TODO: Define global keybinds here if needed.
+	//  NOTE: Define global keybinds here if needed.
 }
 
 pub fn poll_events(mut app App) {
@@ -28,6 +28,7 @@ pub fn poll_events(mut app App) {
 		// Do it using SDL_Event
 		.sdl {
 			for sdl.poll_event(app.inp.event) > 0 {
+				// TODO: more event types.
 				match app.inp.event.@type {
 					// App has been quit (by any means)
 					.quit {
@@ -56,6 +57,7 @@ pub fn poll_events(mut app App) {
 }
 
 // Create an input instance using the provided configuration.
+// TODO: add a config for things like controller sensitivity and other stuff in the future.
 pub fn new_input(parent &App) &Input {
 	v := &Input{
 		parent: parent
