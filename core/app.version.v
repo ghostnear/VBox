@@ -1,7 +1,7 @@
 module core
 
 // TODO: find a way to extract this from the vmod.
-pub const app_version_minor = '1'
+pub const app_version_minor = '2'
 
 pub const app_version_middle = '1'
 

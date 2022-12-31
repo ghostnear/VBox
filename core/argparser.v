@@ -2,9 +2,13 @@ module core
 
 import os
 
+// TODO: print a help menu if using -h or --help.
+
 // For the short version of the arguments.
 const shortened_args = {
 	'dm': 'display-mode'
+	'p': 'platform'
+	'r': 'rom'
 }
 
 // Contains all info about the currently specified command line arguments.

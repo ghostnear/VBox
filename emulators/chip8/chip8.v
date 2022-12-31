@@ -8,14 +8,6 @@ import time
 import term
 import core as app
 
-// Virtual machine config.
-pub struct VMConfig {
-pub mut:
-	rom_path   string
-	gfx_config DisplayConfig
-	inp_config InputConfig
-}
-
 // CHIP8 virtual machine structure.
 [heap]
 pub struct VM {
@@ -57,6 +49,9 @@ pub fn new_vm(cfg VMConfig, mut parent app.App) &VM {
 	// Add hooks for the VM drawing.
 	// TODO: move the drawing in display.v
 	parent.hooks.add_hook('draw', 'chip8', v.draw)
+
+	// Mark everything to be destroyed when app closes.
+	C.atexit(v.destroy)
 
 	return v
 }

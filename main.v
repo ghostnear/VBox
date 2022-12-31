@@ -12,17 +12,15 @@ fn main() {
 
 	// TODO: (longtime) a 'No Game' screen if the settings wouldn't be set properly for an emulator to run.
 
-	// Instantiate VM using default config.
-	mut vm_config := chip8.VMConfig{
-		rom_path: 'roms/chip8/games/Pong (1 player).ch8'
-	}
-	mut chip8_vm := chip8.new_vm(vm_config, mut app_instance)
-	chip8_vm.start()
+	// Instantiate the VM.
+	// TODO: make this general purpose somehow.
+	mut vm := chip8.new_vm(chip8.fetch_vm_config(arg_parser), mut app_instance)
+	vm.start()
 
 	// Main loop
 	for app_instance.is_running() {
 		// TODO: do not stop until all threads are finished. Register the threads in the app context instead.
-		if _unlikely_(!chip8_vm.wait_for_finish()) {
+		if _unlikely_(!vm.wait_for_finish()) {
 			break
 		}
 
@@ -31,6 +29,4 @@ fn main() {
 		app_instance.draw()
 		app_instance.wait_for_next_frame()
 	}
-
-	chip8_vm.destroy()
 }
