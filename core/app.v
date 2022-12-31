@@ -88,7 +88,7 @@ pub fn (self App) is_running() bool {
 }
 
 // Main draw method of the app to be used in the main loop.
-pub fn draw(mut self App) {
+pub fn (mut self App) draw() {
 	self.hooks.call_all_hooks('draw', sdl.null)
 
 	match self.gfx.display_mode {

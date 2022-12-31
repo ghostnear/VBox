@@ -12,8 +12,10 @@ pub mut:
 // TODO: make everything configurable from the command line.
 // TODO: later make everything configurable from a config json as well.
 
-// Builds the app config from all data sources.
-// ex. args, config files, etc.
+/*
+* 	Builds the app config from all data sources.
+*	ex. args, config files, etc.
+*/
 pub fn fetch_app_config(arg_parser &ArgParser) AppConfig {
 	// Initialize the config with the default settings.
 	mut result := AppConfig{

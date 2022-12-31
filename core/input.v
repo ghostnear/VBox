@@ -23,7 +23,7 @@ pub fn (mut self Input) key_up(key sdl.KeyCode) {
 	//  NOTE: Define global keybinds here if needed.
 }
 
-pub fn poll_events(mut app App) {
+pub fn (mut app App) poll_events() {
 	match app.gfx.display_mode {
 		// Do it using SDL_Event
 		.sdl {

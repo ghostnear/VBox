@@ -27,8 +27,8 @@ fn main() {
 		}
 
 		// Do all app things.
-		app.poll_events(mut app_instance)
-		app.draw(mut app_instance)
+		app_instance.poll_events()
+		app_instance.draw()
 		app_instance.wait_for_next_frame()
 	}
 

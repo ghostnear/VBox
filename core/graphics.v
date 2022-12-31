@@ -59,7 +59,7 @@ fn new_gfx(cfg GraphicsConfig, parent &App) ?&Graphics {
 
 			// Create window
 			gfx.sdl_window = sdl.create_window(cfg.window_title.str, sdl.windowpos_centered,
-				sdl.windowpos_centered, cfg.width, cfg.height, 0)
+				sdl.windowpos_centered, cfg.width, cfg.height, u32(sdl.WindowFlags.resizable))
 			if gfx.sdl_window == sdl.null {
 				return error(
 					locale.get_string(parent.locale, 'message_sdl_could_not_create_window') + ' ' +
