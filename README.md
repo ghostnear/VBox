@@ -1,4 +1,4 @@
-# VBox 0.1.0
+# VBox 0.1.1
 
 This project aims to have emulators for different platforms written in such a way that they can be easily understood.
 
