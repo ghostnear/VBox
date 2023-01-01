@@ -25,5 +25,5 @@ if os.args.len != 3
 }
 else
 {
-	os.system(const_paths[os.user_os()] + " -p=${ os.args[1] } -r=${ os.args[2] }")
+	os.system(const_paths[os.user_os()] + ' -p=${ os.args[1] } -r="${ os.args[2] }"')
 }
