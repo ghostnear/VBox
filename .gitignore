@@ -1,12 +1,6 @@
 # Ignore ROMS and logs
 roms/
-logs/
 
 # Ignore built files
-build/
-build
-run
-*.exe
 *.dll
-*.log
-Vbox
+Vbox*
