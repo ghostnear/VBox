@@ -5,7 +5,7 @@ import emulator_gameboy.mappers
 [heap]
 struct RAM {
 mut:
-	cartridge &mappers.GBMapper
+	cartridge &mappers.Mapper
 	bios      &mappers.MapperNone
 	bios_flag bool
 	data      [0x10000]u8

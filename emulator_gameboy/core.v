@@ -8,41 +8,45 @@ import utils
 [heap]
 pub struct Emulator {
 mut:
+	// Externals
 	window &sdl_driver.Window
-
+	// Components
 	ram &RAM
-	cpu CPU
+	cpu &CPU
 }
 
 pub fn create_emulator(config Config) &Emulator {
-	ram := RAM{
-		cartridge: &mappers.MapperNone{}
+	// Create components.
+	ram_component := RAM{
+		cartridge: &mappers.MapperDummy{}
 		bios: &mappers.MapperNone{}
 	}
 
+	cpu_component := CPU{
+		ram: &ram_component
+	}
+
+	// Assemble components
 	mut result := &Emulator{
-		ram: &ram
-		cpu: CPU{
-			ram: &ram
-		}
+		ram: &ram_component
+		cpu: &cpu_component
 		window: 0
 	}
+
+	// Pre-boot stuff.
 	result.cpu.init()
-
 	result.load_bios(config.bios_path)
-
 	result.load_rom(config.rom_path)
 
+	// Done.
 	return result
 }
 
 fn (mut self Emulator) load_rom(path string) {
+	// Open file.
 	mut file := os.open(path) or { panic("Couldn't open Gameboy ROM file. (${err})") }
 
-	println('INFO: Gameboy ROM data:')
-	title := file.read_bytes_at(16, 0x134).bytestr()
-	version := file.read_bytes_at(1, 0x14C)[0]
-	println("INFO: '${title}' ver '${version:02X}'")
+	// Get ROM type and load.
 	rom_type := file.read_bytes_at(1, 0x147)[0]
 	match rom_type {
 		0x00 {
@@ -52,17 +56,20 @@ fn (mut self Emulator) load_rom(path string) {
 			panic('Unimplemented mapper with id ${rom_type:02X}')
 		}
 	}
-	println("INFO: Mapper ('${self.ram.cartridge.name}')")
+	self.ram.cartridge.load_rom_bytes(file.read_bytes(utils.get_file_size(mut file)))
 
-	self.ram.cartridge.set_rom_data(file.read_bytes(utils.get_file_size(mut file)))
+	// TODO: print ROM data.
+	// println('INFO: ROM Data:\n${self.ram.cartridge.rom_data.jsonify()}')
 
 	println('INFO: Gameboy ROM loaded successfully.')
 }
 
 fn (mut self Emulator) load_bios(path string) {
+	// Open file.
 	mut file := os.open(path) or { panic("Couldn't open Gameboy bios file. (${err})") }
 
-	self.ram.bios.set_rom_data(file.read_bytes(utils.get_file_size(mut file)))
+	// Make sure that we let the RAM know it has a BIOS.
+	self.ram.bios.load_rom_bytes(file.read_bytes(utils.get_file_size(mut file)))
 	self.ram.bios_flag = true
 
 	println('INFO: Gameboy BIOS loaded successfully.')

@@ -2,6 +2,7 @@ module emulator_gameboy
 
 import utils
 
+// CPU flag positions as bits in the flag register.
 enum CPU_FLAGS {
 	z = 7
 	n = 6
@@ -9,13 +10,29 @@ enum CPU_FLAGS {
 	c = 4
 }
 
+// These are all the possible CPU jumping conditions.
+// Total has a double role: counting how many of them they are and being the "last condition" which is basically none in this code.
+enum CPU_CONDITIONS {
+	non_zero = 0
+	zero
+	non_carry
+	carry
+	total
+}
+
+/// Functions for working with the CPU flags.
+
+[inline]
 fn set_cpu_flag(mut self CPU, flag CPU_FLAGS, value int) {
 	utils.set_bit(&self.reg.f, int(flag), value)
 }
 
+[inline]
 fn get_cpu_flag(mut self CPU, flag CPU_FLAGS) int {
 	return utils.get_bit(self.reg.f, int(flag))
 }
+
+/// Unknown CPU opcodes.
 
 fn unknown_cb_opcode(mut self CPU, arg1 voidptr, arg2 voidptr) {
 	opcode := self.ram.read_byte(self.pc - 1)
@@ -44,6 +61,8 @@ fn unknown_opcode(mut self CPU, arg1 voidptr, arg2 voidptr) {
 
 	exit(0)
 }
+
+/// Actual instructions.
 
 fn instruction_sub_from_a(mut self CPU, arg1 voidptr, arg2 voidptr) {
 	unsafe {
@@ -118,7 +137,7 @@ fn instruction_ld_hl_p_a(mut self CPU, arg1 voidptr, arg2 voidptr) {
 }
 
 fn instruction_set_interrupts(mut self CPU, arg1 voidptr, arg2 voidptr) {
-	self.ime = arg1 != 0
+	self.ram.write_byte(0xFFFF, arg1)
 }
 
 fn instruction_inc(mut self CPU, arg1 voidptr, arg2 voidptr) {

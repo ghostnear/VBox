@@ -1,5 +1,6 @@
 module emulator_gameboy
 
+// CPU instruction have been configured into a function pointer to our routines and 2 arguments. Lets hope none of them are longer.
 struct Instruction {
 	func fn (mut self CPU, arg1 voidptr, arg2 voidptr) = unsafe { nil }
 	arg1 voidptr
@@ -7,6 +8,8 @@ struct Instruction {
 }
 
 // WARN: THIS ORDER ASSUMES THAT WE ARE USING LITTLE ENDIANESS
+
+// Registers are marked as packed because, using funny pointers, we can get the 16 bit registers much easier this way.
 [packed]
 struct Registers {
 mut:
@@ -20,32 +23,26 @@ mut:
 	l u8
 }
 
-enum CPU_CONDITIONS {
-	non_zero = 0
-	zero
-	non_carry
-	carry
-}
-
+[heap]
 struct CPU {
 mut:
+	// Refference to the RAM so we can use it.
 	ram &RAM
-
+	// "Special registers"
 	pc u16
 	sp u16
-
+	// Registers are stored here.
 	reg Registers
-
-	ime bool
-
-	rp_table  []&u16
-	rp2_table []&u16
-	rot_table []fn (mut self CPU, arg1 voidptr, arg2 voidptr)
-	alu_table []fn (mut self CPU, arg1 voidptr, arg2 voidptr)
-	reg_table []&u8
+	// Instruction decoding tables.
+	rot_table []fn (mut self CPU, arg1 voidptr, arg2 voidptr) // Rotation / shift operations.
+	alu_table []fn (mut self CPU, arg1 voidptr, arg2 voidptr) // Arithmetic / logic operations.
+	rp_table  []&u16 //
+	rp2_table []&u16 // 16 bit register tables.
+	reg_table []&u8  // 8 bit register table.
 }
 
 fn (mut self CPU) init() {
+	// Initialize tables.
 	unsafe {
 		self.rp_table = [&u16(&self.reg.b), &self.reg.d, &self.reg.h, &self.sp]
 		self.rp2_table = [&u16(&self.reg.b), &self.reg.d, &self.reg.h, &self.reg.a]
@@ -67,7 +64,7 @@ fn (mut self CPU) init() {
 		&self.reg.e,
 		&self.reg.h,
 		&self.reg.l,
-		0,
+		0, // This is fixed by update_hl_reg()
 		&self.reg.a,
 	]
 	self.rot_table = [
@@ -82,6 +79,7 @@ fn (mut self CPU) init() {
 	]
 }
 
+[inline]
 fn (mut self CPU) update_hl_reg() {
 	unsafe {
 		self.reg_table[6] = self.ram.get_pointer(&u16(&self.reg.h))
@@ -89,6 +87,11 @@ fn (mut self CPU) update_hl_reg() {
 }
 
 fn (mut self CPU) decode_opcode(opcode u16) Instruction {
+	/*
+	* The Romanian programmers' book this guy used is here to save us.
+	 * https://gb-archive.github.io/salvage/decoding_gbz80_opcodes/Decoding%20Gamboy%20Z80%20Opcodes.html
+	*/
+
 	x := opcode >> 6
 	y := (opcode >> 3) & 0b111
 	z := opcode & 0b111
@@ -106,7 +109,7 @@ fn (mut self CPU) decode_opcode(opcode u16) Instruction {
 								arg1: self.ram.read_byte(self.pc)
 							}
 						}
-						4...7 {
+						4...8 {
 							return Instruction{
 								func: instruction_conditional_relative_jump
 								arg1: y - 4
@@ -350,6 +353,7 @@ fn (mut self CPU) decode_opcode(opcode u16) Instruction {
 }
 
 fn (mut self CPU) decode_cb_opcode(opcode u16) Instruction {
+	// CB opcodes don't care about anything else than those 3.
 	x := opcode >> 6
 	y := (opcode >> 3) & 0b111
 	z := opcode & 0b111
@@ -379,9 +383,12 @@ fn (mut self CPU) decode_cb_opcode(opcode u16) Instruction {
 }
 
 pub fn (mut self CPU) step() {
+	// Fetch opcode.
 	mut opcode := self.ram.read_byte(self.pc)
 	println('${self.pc:04X}')
 	self.pc++
+
+	// Special CB opcode.
 	if opcode == 0xCB {
 		opcode = self.ram.read_byte(self.pc)
 		self.pc++
@@ -389,6 +396,8 @@ pub fn (mut self CPU) step() {
 		instruction.func(mut self, instruction.arg1, instruction.arg2)
 		return
 	}
+
+	// Normal opcode
 	instruction := self.decode_opcode(opcode)
 	instruction.func(mut self, instruction.arg1, instruction.arg2)
 }
