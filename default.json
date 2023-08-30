@@ -1,4 +1,5 @@
 {
-    "emu_type": "chip8",
-    "rom_path": "./roms/1-chip8-logo.ch8"
+    "emu_type": "gameboy",
+    "rom_path": "./roms/gb/games/Tetris (World) (Rev A).gb",
+    "bios_path": "./roms/gb/bios/gb_bios.bin"
 }

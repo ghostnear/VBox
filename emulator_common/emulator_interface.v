@@ -7,4 +7,5 @@ mut:
 	window &sdl_driver.Window
 	draw()
 	update()
+	is_running() bool
 }
