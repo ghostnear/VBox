@@ -1,23 +1,25 @@
 module main
 
+import os
 import sdl_driver
 
 fn main() {
+	// Create window.
 	mut window := sdl_driver.create_window(sdl_driver.WindowConfig{
 		title: 'VBox'
 		width: 960
 		height: 540
 	})
 
-	mut emulator := load_emulator('default.json')
+	// Create emulator
+	mut emulator := load_emulator(os.args[1])
 	emulator.window = window
 
+	// Main loop.
 	for !window.should_close() {
-		// Update stuff.
 		window.update()
 		emulator.update()
 
-		// Draw stuff.
 		window.start_drawing()
 		emulator.draw()
 		window.end_drawing()

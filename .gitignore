@@ -4,3 +4,6 @@ roms/
 # Ignore built files
 *.dll
 Vbox*
+
+# Ignore user scripts
+run.bat

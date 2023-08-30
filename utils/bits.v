@@ -1,5 +1,7 @@
 module utils
 
+// This file contains bitwise operations.
+
 [inline]
 pub fn get_bit(number int, count int) int {
 	return (number >> count) & 0b1

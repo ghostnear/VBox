@@ -1,6 +1,8 @@
-module emulator_common
+module utils
 
 import sdl_driver
+
+// This file contains the emulator interface.
 
 interface Emulator {
 mut:
