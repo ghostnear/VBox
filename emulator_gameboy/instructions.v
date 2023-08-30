@@ -148,7 +148,7 @@ fn instruction_conditional_relative_jump(mut self CPU, arg1 voidptr, arg2 voidpt
 		.zero {
 			if get_cpu_flag(mut self, CPU_FLAGS.z) != 0 {
 				return
-			}	
+			}
 		}
 		.non_zero {
 			if get_cpu_flag(mut self, CPU_FLAGS.z) == 0 {

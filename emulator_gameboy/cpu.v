@@ -334,7 +334,7 @@ fn (mut self CPU) decode_opcode(opcode u16) Instruction {
 					data := self.ram.read_byte(self.pc)
 					self.pc++
 					return Instruction{
-						func: self.alu_table[y],
+						func: self.alu_table[y]
 						arg1: &data
 					}
 				}
@@ -380,7 +380,7 @@ fn (mut self CPU) decode_cb_opcode(opcode u16) Instruction {
 
 pub fn (mut self CPU) step() {
 	mut opcode := self.ram.read_byte(self.pc)
-	println("${self.pc:04X}")
+	println('${self.pc:04X}')
 	self.pc++
 	if opcode == 0xCB {
 		opcode = self.ram.read_byte(self.pc)
