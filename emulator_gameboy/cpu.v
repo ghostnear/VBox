@@ -140,10 +140,12 @@ fn (mut self CPU) decode_opcode(opcode u16) Instruction {
 							}
 						}
 						4...8 {
+							data := self.ram.read_byte(self.pc)
+							self.pc += 1
 							return Instruction{
 								func: instruction_conditional_relative_jump
 								arg1: y - 4
-								arg2: self.ram.read_byte(self.pc)
+								arg2: data
 							}
 						}
 						else {}
@@ -167,6 +169,15 @@ fn (mut self CPU) decode_opcode(opcode u16) Instruction {
 					match q {
 						0 {
 							match p {
+								1 {
+									unsafe {
+										return Instruction{
+											func: instruction_ld_8
+											arg1: self.ram.get_pointer(*&u16(&self.reg.e))
+											arg2: &self.reg.a
+										}
+									}
+								}
 								2 {
 									return Instruction{
 										func: instruction_ld_hl_p_a
@@ -187,8 +198,13 @@ fn (mut self CPU) decode_opcode(opcode u16) Instruction {
 										return Instruction{
 											func: instruction_ld_8
 											arg1: &self.reg.a
-											arg2: self.ram.get_pointer(&u16(&self.reg.d))
+											arg2: self.ram.get_pointer(&u16(&self.reg.e))
 										}
+									}
+								}
+								2 {
+									return Instruction{
+										func: instruction_ld_a_hl_p
 									}
 								}
 								else {}
@@ -202,7 +218,7 @@ fn (mut self CPU) decode_opcode(opcode u16) Instruction {
 						0 {
 							return Instruction{
 								func: instruction_inc_16
-								arg1: &self.rp_table[p]
+								arg1: self.rp_table[p]
 							}
 						}
 						else {}

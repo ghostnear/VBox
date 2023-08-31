@@ -128,7 +128,7 @@ fn instruction_ld_8imm(mut self CPU, arg1 voidptr, arg2 voidptr) {
 
 fn instruction_ld_hl_m_a(mut self CPU, arg1 voidptr, arg2 voidptr) {
 	unsafe {
-		mut hl := &u16(&self.reg.h)
+		mut hl := &u16(&self.reg.l)
 		self.ram.write_byte(*hl, self.reg.a)
 		(*hl)--
 	}
@@ -136,8 +136,16 @@ fn instruction_ld_hl_m_a(mut self CPU, arg1 voidptr, arg2 voidptr) {
 
 fn instruction_ld_hl_p_a(mut self CPU, arg1 voidptr, arg2 voidptr) {
 	unsafe {
-		mut hl := &u16(&self.reg.h)
+		mut hl := &u16(&self.reg.l)
 		self.ram.write_byte(*hl, self.reg.a)
+		(*hl)++
+	}
+}
+
+fn instruction_ld_a_hl_p(mut self CPU, arg1 voidptr, arg2 voidptr) {
+	unsafe {
+		mut hl := &u16(&self.reg.l)
+		self.reg.a = self.ram.read_byte(*hl)
 		(*hl)++
 	}
 }
@@ -148,7 +156,10 @@ fn instruction_set_interrupts(mut self CPU, arg1 voidptr, arg2 voidptr) {
 
 fn instruction_inc(mut self CPU, arg1 voidptr, arg2 voidptr) {
 	addr := &u8(arg1)
+	set_cpu_flag(mut self, CPU_FLAGS.h, int((((*addr & 0xf) + (0x01 & 0xf)) & 0x10) == 0x10))
 	(*addr)++
+	set_cpu_flag(mut self, CPU_FLAGS.z, int(*addr == 0))
+	set_cpu_flag(mut self, CPU_FLAGS.n, 0)
 }
 
 fn instruction_inc_16(mut self CPU, arg1 voidptr, arg2 voidptr) {
@@ -158,6 +169,7 @@ fn instruction_inc_16(mut self CPU, arg1 voidptr, arg2 voidptr) {
 
 fn instruction_dec(mut self CPU, arg1 voidptr, arg2 voidptr) {
 	addr := &u8(arg1)
+	set_cpu_flag(mut self, CPU_FLAGS.h, int((((*addr & 0xf) + (0xFF & 0xf)) & 0x10) != 0x10))
 	(*addr)--
 	set_cpu_flag(mut self, CPU_FLAGS.z, int(*addr == 0))
 	set_cpu_flag(mut self, CPU_FLAGS.n, 1)
@@ -168,15 +180,14 @@ fn instruction_relative_jump(mut self CPU, arg1 voidptr, arg2 voidptr) {
 }
 
 fn instruction_conditional_relative_jump(mut self CPU, arg1 voidptr, arg2 voidptr) {
-	self.pc += 1
 	match CPU_CONDITIONS(arg1) {
 		.zero {
-			if get_cpu_flag(mut self, CPU_FLAGS.z) != 0 {
+			if get_cpu_flag(mut self, CPU_FLAGS.z) == 0 {
 				return
 			}
 		}
 		.non_zero {
-			if get_cpu_flag(mut self, CPU_FLAGS.z) == 0 {
+			if get_cpu_flag(mut self, CPU_FLAGS.z) != 0 {
 				return
 			}
 		}

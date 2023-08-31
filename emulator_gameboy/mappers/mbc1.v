@@ -34,7 +34,7 @@ pub fn (mut self MapperMBC1) read_byte(addr u16) u8 {
 
 	// Any other banks
 	if addr <= 0x7FFF {
-		return self.banks[self.rom_bank][addr - 0x7FFF]
+		return self.banks[self.rom_bank][addr - 0x4000]
 	}
 
 	// No RAM, no nothing, just 0x00.
@@ -61,5 +61,16 @@ pub fn (mut self MapperMBC1) write_word(addr u16, value u16) {
 }
 
 pub fn (mut self MapperMBC1) get_pointer(addr u16) &u8 {
-	return unsafe { nil }
+	// First bank, forced.
+	if addr <= 0x3FFF {
+		return &self.banks[0][addr]
+	}
+
+	// Any other banks
+	if addr <= 0x7FFF {
+		return &self.banks[self.rom_bank][addr - 0x4000]
+	}
+
+	// No RAM, no nothing, just 0x00.
+	return 0x00
 }
