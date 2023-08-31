@@ -9,6 +9,7 @@ mut:
 }
 
 pub fn (mut self PPU) update() {
+	// TODO: not do this.
 	self.lcdc[0x4] = 0x90
 }
 

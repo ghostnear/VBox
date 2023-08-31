@@ -15,8 +15,8 @@ struct Instruction {
 [packed]
 struct Registers {
 mut:
-	a u8
 	f u8
+	a u8
 	c u8
 	b u8
 	e u8
@@ -59,11 +59,11 @@ fn (mut self CPU) init() {
 		self.rp2_table = [&u16(&self.reg.c), &self.reg.e, &self.reg.l, &self.reg.a]
 	}
 	self.alu_table = [
-		unknown_opcode,
-		unknown_opcode,
+		instruction_add_to_a,
+		instruction_add_with_carry_to_a,
 		instruction_sub_from_a,
-		unknown_opcode,
-		unknown_opcode,
+		unknown_alu_opcode,
+		instruction_and_with_a,
 		instruction_xor_with_a,
 		instruction_or_with_a,
 		instruction_cp_with_a,
@@ -82,11 +82,11 @@ fn (mut self CPU) init() {
 		unknown_cb_opcode,
 		unknown_cb_opcode,
 		instruction_cb_rotate_left,
+		instruction_cb_rotate_right,
 		unknown_cb_opcode,
 		unknown_cb_opcode,
 		unknown_cb_opcode,
-		unknown_cb_opcode,
-		unknown_cb_opcode,
+		instruction_cb_shift_logical_right,
 	]
 }
 
@@ -107,7 +107,7 @@ fn (mut self CPU) set_post_boot_state() {
 [inline]
 fn (mut self CPU) update_hl_reg() {
 	unsafe {
-		self.reg_table[6] = self.ram.get_pointer(&u16(&self.reg.h))
+		self.reg_table[6] = self.ram.get_pointer(&u16(&self.reg.l))
 	}
 }
 
@@ -129,6 +129,12 @@ fn (mut self CPU) decode_opcode(opcode u16) Instruction {
 				0 {
 					match y {
 						0 {
+							return Instruction{
+								func: instruction_nop
+							}
+						}
+						2 {
+							println('WARN: Unimplemented STOP instruction.')
 							return Instruction{
 								func: instruction_nop
 							}
@@ -160,6 +166,13 @@ fn (mut self CPU) decode_opcode(opcode u16) Instruction {
 								func: instruction_ld_16imm
 								arg1: self.rp_table[p]
 								arg2: data
+							}
+						}
+						1 {
+							return Instruction{
+								func: instruction_add_16
+								arg1: &self.reg.l
+								arg2: self.rp_table[p]
 							}
 						}
 						else {}
@@ -257,6 +270,11 @@ fn (mut self CPU) decode_opcode(opcode u16) Instruction {
 								arg1: &self.reg.a
 							}
 						}
+						3 {
+							return Instruction{
+								func: instruction_rotate_right_a
+							}
+						}
 						else {}
 					}
 				}
@@ -265,8 +283,12 @@ fn (mut self CPU) decode_opcode(opcode u16) Instruction {
 		}
 		1 {
 			if z == 6 && y == 6 {
-				panic('HALT UNIMPLEMENTED')
+				println('WARN: Unimplemented HALT instruction.')
+				return Instruction{
+					func: instruction_nop
+				}
 			}
+			self.update_hl_reg()
 			return Instruction{
 				func: instruction_ld_8
 				arg1: self.reg_table[y]
@@ -284,6 +306,12 @@ fn (mut self CPU) decode_opcode(opcode u16) Instruction {
 			match z {
 				0 {
 					match y {
+						0...3 {
+							return Instruction{
+								func: instruction_conditional_ret
+								arg1: y
+							}
+						}
 						4 {
 							data := self.ram.read_byte(self.pc)
 							self.pc += 1
@@ -320,6 +348,12 @@ fn (mut self CPU) decode_opcode(opcode u16) Instruction {
 										func: instruction_ret
 									}
 								}
+								2 {
+									return Instruction{
+										func: instruction_direct_jump
+										arg1: unsafe { *&u16(&self.reg.l) }
+									}
+								}
 								else {}
 							}
 						}
@@ -328,20 +362,23 @@ fn (mut self CPU) decode_opcode(opcode u16) Instruction {
 				}
 				2 {
 					match y {
-						4 {
-							return Instruction{
-								func: instruction_ld_addr_8
-								arg1: 0xFF00 + self.reg.c
-								arg2: self.reg.a
-							}
-						}
 						5 {
 							data := self.ram.read_word(self.pc)
 							self.pc += 2
 							return Instruction{
-								func: instruction_ld_addr_8
-								arg1: data
-								arg2: self.reg.a
+								func: instruction_ld_8
+								arg1: self.ram.get_pointer(data)
+								arg2: &self.reg.a
+							}
+						}
+						7 {
+							data := self.ram.read_word(self.pc)
+							self.pc += 2
+							new_data := self.ram.read_word(data)
+							return Instruction{
+								func: instruction_ld_8
+								arg1: &self.reg.a
+								arg2: &new_data
 							}
 						}
 						else {}
@@ -370,6 +407,15 @@ fn (mut self CPU) decode_opcode(opcode u16) Instruction {
 							}
 						}
 						else {}
+					}
+				}
+				4 {
+					data := self.ram.read_word(self.pc)
+					self.pc += 2
+					return Instruction{
+						func: instruction_conditional_call
+						arg1: y
+						arg2: data
 					}
 				}
 				5 {
