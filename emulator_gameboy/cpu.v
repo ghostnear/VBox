@@ -17,12 +17,12 @@ struct Registers {
 mut:
 	a u8
 	f u8
-	b u8
 	c u8
-	d u8
+	b u8
 	e u8
-	h u8
+	d u8
 	l u8
+	h u8
 }
 
 [heap]
@@ -55,8 +55,8 @@ fn (mut self CPU) log_current_status() {
 fn (mut self CPU) init() {
 	// Initialize tables.
 	unsafe {
-		self.rp_table = [&u16(&self.reg.b), &self.reg.d, &self.reg.h, &self.sp]
-		self.rp2_table = [&u16(&self.reg.b), &self.reg.d, &self.reg.h, &self.reg.a]
+		self.rp_table = [&u16(&self.reg.c), &self.reg.e, &self.reg.l, &self.sp]
+		self.rp2_table = [&u16(&self.reg.c), &self.reg.e, &self.reg.l, &self.reg.a]
 	}
 	self.alu_table = [
 		unknown_opcode,
@@ -152,10 +152,12 @@ fn (mut self CPU) decode_opcode(opcode u16) Instruction {
 				1 {
 					match q {
 						0 {
+							data := self.ram.read_word(self.pc)
+							self.pc += 2
 							return Instruction{
 								func: instruction_ld_16imm
 								arg1: self.rp_table[p]
-								arg2: self.ram.read_word(self.pc)
+								arg2: data
 							}
 						}
 						else {}
@@ -221,11 +223,14 @@ fn (mut self CPU) decode_opcode(opcode u16) Instruction {
 					}
 				}
 				6 {
+					data := self.ram.read_byte(self.pc)
+					self.pc += 1
+
 					self.update_hl_reg()
 					return Instruction{
 						func: instruction_ld_8imm
-						arg1: self.reg_table[p]
-						arg2: self.ram.read_byte(self.pc + 1)
+						arg1: self.reg_table[y]
+						arg2: data
 					}
 				}
 				7 {

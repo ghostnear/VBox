@@ -93,7 +93,6 @@ fn instruction_ld_16imm(mut self CPU, arg1 voidptr, arg2 voidptr) {
 	unsafe {
 		*(&u16(arg1)) = u16(arg2)
 	}
-	self.pc += 2
 }
 
 fn instruction_ld_addr_8(mut self CPU, arg1 voidptr, arg2 voidptr) {
@@ -125,7 +124,6 @@ fn instruction_ld_8imm(mut self CPU, arg1 voidptr, arg2 voidptr) {
 	unsafe {
 		*(&u8(arg1)) = u8(arg2)
 	}
-	self.pc += 1
 }
 
 fn instruction_ld_hl_m_a(mut self CPU, arg1 voidptr, arg2 voidptr) {
