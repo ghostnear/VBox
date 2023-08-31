@@ -65,7 +65,7 @@ fn (mut self CPU) init() {
 		unknown_opcode,
 		unknown_opcode,
 		instruction_xor_with_a,
-		unknown_opcode,
+		instruction_or_with_a,
 		instruction_cp_with_a,
 	]
 	self.reg_table = [
@@ -285,20 +285,21 @@ fn (mut self CPU) decode_opcode(opcode u16) Instruction {
 				0 {
 					match y {
 						4 {
+							data := self.ram.read_byte(self.pc)
 							self.pc += 1
 							return Instruction{
 								func: instruction_ld_8
-								arg1: self.ram.get_pointer(0xFF00 + self.ram.read_byte(self.pc))
+								arg1: self.ram.get_pointer(u16(0xFF00) + data)
 								arg2: &self.reg.a
 							}
 						}
 						6 {
-							data := self.ram.read_byte(0xFF00 + self.ram.read_byte(self.pc))
+							data := self.ram.read_byte(self.pc)
 							self.pc += 1
 							return Instruction{
 								func: instruction_ld_8
 								arg1: &self.reg.a
-								arg2: &data
+								arg2: self.ram.get_pointer(u16(0xFF00) + data)
 							}
 						}
 						else {}

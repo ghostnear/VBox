@@ -11,8 +11,8 @@ pub fn (mut self PPU) read_vram_byte(addr u16) u8 {
 }
 
 [inline]
-pub fn (mut self PPU) get_lcdc_pointer(addr u16) &u8 {
-	return &self.lcdc[addr]
+pub fn (mut self PPU) get_vram_pointer(addr u16) &u8 {
+	return &self.vram[addr]
 }
 
 [inline]
@@ -26,8 +26,8 @@ pub fn (mut self PPU) read_lcdc_byte(addr u16) u8 {
 }
 
 [inline]
-pub fn (mut self PPU) get_vram_pointer(addr u16) &u8 {
-	return &self.vram[addr]
+pub fn (mut self PPU) get_lcdc_pointer(addr u16) &u8 {
+	return &self.lcdc[addr]
 }
 
 [inline]

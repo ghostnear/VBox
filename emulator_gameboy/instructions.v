@@ -82,6 +82,16 @@ fn instruction_xor_with_a(mut self CPU, arg1 voidptr, arg2 voidptr) {
 	}
 }
 
+fn instruction_or_with_a(mut self CPU, arg1 voidptr, arg2 voidptr) {
+	unsafe {
+		self.reg.a |= *(&u8(arg1))
+		set_cpu_flag(mut self, CPU_FLAGS.z, int(self.reg.a == 0))
+		set_cpu_flag(mut self, CPU_FLAGS.n, 0)
+		set_cpu_flag(mut self, CPU_FLAGS.c, 0)
+		set_cpu_flag(mut self, CPU_FLAGS.h, 0)
+	}
+}
+
 fn instruction_cp_with_a(mut self CPU, arg1 voidptr, arg2 voidptr) {
 	result := self.reg.a - *(&u8(arg1))
 	set_cpu_flag(mut self, CPU_FLAGS.z, int(result == 0))

@@ -9,6 +9,7 @@ mut:
 }
 
 pub fn (mut self PPU) update() {
+	self.lcdc[0x4] = 0x90
 }
 
 pub fn (mut self PPU) draw() {
