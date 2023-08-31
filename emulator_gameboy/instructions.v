@@ -100,6 +100,14 @@ fn instruction_ld_addr_8(mut self CPU, arg1 voidptr, arg2 voidptr) {
 	self.ram.write_byte(arg1, arg2)
 }
 
+fn instruction_direct_jump(mut self CPU, arg1 voidptr, arg2 voidptr) {
+	self.pc = u16(arg1)
+}
+
+fn instruction_nop(mut self CPU, arg1 voidptr, arg2 voidptr) {
+	// Do nothing obviously.
+}
+
 fn instruction_ld_8(mut self CPU, arg1 voidptr, arg2 voidptr) {
 	unsafe {
 		*(&u8(arg1)) = *(&u8(arg2))

@@ -1,5 +1,6 @@
 {
     "emu_type": "gameboy",
-    "rom_path": "./roms/gb/games/Tetris (World) (Rev A).gb",
-    "bios_path": "./roms/gb/bios/gb_bios.bin"
+    "rom_path": "./roms/gb/test/cpu_instrs/individual/04-op r,imm.gb",
+    "bios_path": "",
+    "debug_log_file": "./gameboy-doctor/vbox.log"
 }

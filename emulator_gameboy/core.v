@@ -13,13 +13,17 @@ mut:
 	// Components
 	ram &RAM
 	cpu &CPU
+	ppu &PPU
 }
 
 pub fn create_emulator(config Config) &Emulator {
 	// Create components.
+	ppu_component := PPU{}
+
 	ram_component := RAM{
 		cartridge: &mappers.MapperDummy{}
 		bios: &mappers.MapperNone{}
+		ppu: &ppu_component
 	}
 
 	cpu_component := CPU{
@@ -30,6 +34,7 @@ pub fn create_emulator(config Config) &Emulator {
 	mut result := &Emulator{
 		ram: &ram_component
 		cpu: &cpu_component
+		ppu: &ppu_component
 		window: 0
 	}
 
@@ -37,6 +42,11 @@ pub fn create_emulator(config Config) &Emulator {
 	result.cpu.init()
 	result.load_bios(config.bios_path)
 	result.load_rom(config.rom_path)
+
+	// Enable logging if needed.
+	if config.debug_log_file != '' {
+		result.cpu.debug = os.open_file(config.debug_log_file, 'w') or { panic(err) }
+	}
 
 	// Done.
 	return result
@@ -52,6 +62,9 @@ fn (mut self Emulator) load_rom(path string) {
 		0x00 {
 			self.ram.cartridge = &mappers.MapperNone{}
 		}
+		0x01 {
+			self.ram.cartridge = &mappers.MapperMBC1{}
+		}
 		else {
 			panic('Unimplemented mapper with id ${rom_type:02X}')
 		}
@@ -65,6 +78,12 @@ fn (mut self Emulator) load_rom(path string) {
 }
 
 fn (mut self Emulator) load_bios(path string) {
+	// No bios is also an option.
+	if path == '' {
+		self.cpu.set_post_boot_state()
+		return
+	}
+
 	// Open file.
 	mut file := os.open(path) or { panic("Couldn't open Gameboy bios file. (${err})") }
 
@@ -76,10 +95,12 @@ fn (mut self Emulator) load_bios(path string) {
 }
 
 pub fn (mut self Emulator) draw() {
+	self.ppu.draw()
 }
 
 pub fn (mut self Emulator) update() {
 	self.cpu.step()
+	self.ppu.update()
 }
 
 pub fn (mut self Emulator) is_running() bool {

@@ -1,5 +1,7 @@
 module emulator_gameboy
 
+import os
+
 // CPU instruction have been configured into a function pointer to our routines and 2 arguments. Lets hope none of them are longer.
 struct Instruction {
 	func fn (mut self CPU, arg1 voidptr, arg2 voidptr) = unsafe { nil }
@@ -39,6 +41,15 @@ mut:
 	rp_table  []&u16 //
 	rp2_table []&u16 // 16 bit register tables.
 	reg_table []&u8  // 8 bit register table.
+	// For debug logging only.
+	debug os.File
+}
+
+fn (mut self CPU) log_current_status() {
+	// I sure love funny string formatting making my lines long...
+	self.debug.writeln('A:${self.reg.a:02X} F:${self.reg.f:02X} B:${self.reg.b:02X} C:${self.reg.c:02X} D:${self.reg.d:02X} E:${self.reg.e:02X} H:${self.reg.h:02X} L:${self.reg.l:02X} SP:${self.sp:04X} PC:${self.pc:04X} PCMEM:${self.ram.read_byte(self.pc):02X},${self.ram.read_byte(
+		self.pc + 1):02X},${self.ram.read_byte(self.pc + 2):02X},${self.ram.read_byte(self.pc + 3):02X}') or {}
+	self.debug.flush()
 }
 
 fn (mut self CPU) init() {
@@ -79,6 +90,20 @@ fn (mut self CPU) init() {
 	]
 }
 
+// Useful for skipping the boot ROM.
+fn (mut self CPU) set_post_boot_state() {
+	self.reg.a = 0x01
+	self.reg.f = 0xB0
+	self.reg.b = 0x00
+	self.reg.c = 0x13
+	self.reg.d = 0x00
+	self.reg.e = 0xD8
+	self.reg.h = 0x01
+	self.reg.l = 0x4D
+	self.sp = 0xFFFE
+	self.pc = 0x100
+}
+
 [inline]
 fn (mut self CPU) update_hl_reg() {
 	unsafe {
@@ -103,6 +128,11 @@ fn (mut self CPU) decode_opcode(opcode u16) Instruction {
 			match z {
 				0 {
 					match y {
+						0 {
+							return Instruction{
+								func: instruction_nop
+							}
+						}
 						3 {
 							return Instruction{
 								func: instruction_relative_jump
@@ -236,9 +266,9 @@ fn (mut self CPU) decode_opcode(opcode u16) Instruction {
 						4 {
 							self.pc += 1
 							return Instruction{
-								func: instruction_ld_addr_8
-								arg1: 0xFF00 + self.ram.read_byte(self.pc)
-								arg2: self.reg.a
+								func: instruction_ld_8
+								arg1: self.ram.get_pointer(0xFF00 + self.ram.read_byte(self.pc))
+								arg2: &self.reg.a
 							}
 						}
 						6 {
@@ -297,6 +327,14 @@ fn (mut self CPU) decode_opcode(opcode u16) Instruction {
 				}
 				3 {
 					match y {
+						0 {
+							data := self.ram.read_word(self.pc)
+							self.pc += 2
+							return Instruction{
+								func: instruction_direct_jump
+								arg1: data
+							}
+						}
 						6 {
 							return Instruction{
 								func: instruction_set_interrupts
@@ -383,15 +421,20 @@ fn (mut self CPU) decode_cb_opcode(opcode u16) Instruction {
 }
 
 pub fn (mut self CPU) step() {
+	// Log status before execution if the parameters are set.
+	if self.debug.is_opened {
+		self.log_current_status()
+	}
+
 	// Fetch opcode.
 	mut opcode := self.ram.read_byte(self.pc)
-	println('${self.pc:04X}')
 	self.pc++
 
 	// Special CB opcode.
 	if opcode == 0xCB {
 		opcode = self.ram.read_byte(self.pc)
 		self.pc++
+
 		instruction := self.decode_cb_opcode(opcode)
 		instruction.func(mut self, instruction.arg1, instruction.arg2)
 		return

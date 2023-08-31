@@ -5,5 +5,7 @@ roms/
 *.dll
 Vbox*
 
-# Ignore user scripts
+# Ignore user files
 run.bat
+output.txt
+gameboy-doctor/

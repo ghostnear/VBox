@@ -23,7 +23,7 @@ pub fn (mut self MapperNone) read_byte(addr u16) u8 {
 
 [inline]
 pub fn (mut self MapperNone) write_byte(addr u16, value u8) {
-	self.data[addr] = value
+	// Do not write anything.
 }
 
 [inline]
@@ -38,5 +38,5 @@ pub fn (mut self MapperNone) write_word(addr u16, value u16) {
 }
 
 pub fn (mut self MapperNone) get_pointer(addr u16) &u8 {
-	return &self.data[addr]
+	return unsafe { nil }
 }
