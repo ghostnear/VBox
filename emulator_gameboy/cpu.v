@@ -56,7 +56,7 @@ fn (mut self CPU) init() {
 	// Initialize tables.
 	unsafe {
 		self.rp_table = [&u16(&self.reg.c), &self.reg.e, &self.reg.l, &self.sp]
-		self.rp2_table = [&u16(&self.reg.c), &self.reg.e, &self.reg.l, &self.reg.a]
+		self.rp2_table = [&u16(&self.reg.c), &self.reg.e, &self.reg.l, &self.reg.f]
 	}
 	self.alu_table = [
 		instruction_add_to_a,

@@ -91,10 +91,10 @@ fn instruction_add_to_a(mut self CPU, arg1 voidptr, arg2 voidptr) {
 
 fn instruction_add_with_carry_to_a(mut self CPU, arg1 voidptr, arg2 voidptr) {
 	unsafe {
-		*(&u8(arg1)) += u8(get_cpu_flag(mut self, CPU_FLAGS.c))
-		set_cpu_flag(mut self, CPU_FLAGS.c, int(0xFF - self.reg.a < *(&u8(arg1))))
-		set_cpu_flag(mut self, CPU_FLAGS.h, int((((self.reg.a & 0xf) + (*(&u8(arg1)) & 0xf)) & 0x10) == 0x10))
-		self.reg.a += *(&u8(arg1))
+		value := *(&u8(arg1)) + u8(get_cpu_flag(mut self, CPU_FLAGS.c))
+		set_cpu_flag(mut self, CPU_FLAGS.c, int(0xFF - self.reg.a < value))
+		set_cpu_flag(mut self, CPU_FLAGS.h, int((((self.reg.a & 0xF) + (value & 0xF)) & 0x10) == 0x10))
+		self.reg.a += value
 		set_cpu_flag(mut self, CPU_FLAGS.z, int(self.reg.a == 0))
 		set_cpu_flag(mut self, CPU_FLAGS.n, 0)
 	}
@@ -103,7 +103,7 @@ fn instruction_add_with_carry_to_a(mut self CPU, arg1 voidptr, arg2 voidptr) {
 fn instruction_sub_from_a(mut self CPU, arg1 voidptr, arg2 voidptr) {
 	unsafe {
 		set_cpu_flag(mut self, CPU_FLAGS.c, int(self.reg.a < *(&u8(arg1))))
-		set_cpu_flag(mut self, CPU_FLAGS.h, int((self.reg.a & 0xf) < (*(&u8(arg1)) & 0xf)))
+		set_cpu_flag(mut self, CPU_FLAGS.h, int((self.reg.a & 0xF) < (*(&u8(arg1)) & 0xF)))
 		self.reg.a -= *(&u8(arg1))
 		set_cpu_flag(mut self, CPU_FLAGS.z, int(self.reg.a == 0))
 		set_cpu_flag(mut self, CPU_FLAGS.n, 1)
@@ -141,7 +141,7 @@ fn instruction_or_with_a(mut self CPU, arg1 voidptr, arg2 voidptr) {
 }
 
 fn instruction_cp_with_a(mut self CPU, arg1 voidptr, arg2 voidptr) {
-	set_cpu_flag(mut self, CPU_FLAGS.h, int((self.reg.a & 0xf) < (*(&u8(arg1)) & 0xf)))
+	set_cpu_flag(mut self, CPU_FLAGS.h, int((self.reg.a & 0xF) < (*(&u8(arg1)) & 0xF)))
 	result := self.reg.a - *(&u8(arg1))
 	set_cpu_flag(mut self, CPU_FLAGS.z, int(result == 0))
 	set_cpu_flag(mut self, CPU_FLAGS.n, 1)
@@ -242,6 +242,11 @@ fn instruction_inc_16(mut self CPU, arg1 voidptr, arg2 voidptr) {
 
 fn check_flag(mut self CPU, flag CPU_CONDITIONS) bool {
 	match flag {
+		.carry {
+			if get_cpu_flag(mut self, CPU_FLAGS.c) == 0 {
+				return false
+			}
+		}
 		.non_carry {
 			if get_cpu_flag(mut self, CPU_FLAGS.c) != 0 {
 				return false
