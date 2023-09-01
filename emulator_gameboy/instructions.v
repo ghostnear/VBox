@@ -91,10 +91,10 @@ fn instruction_add_to_a(mut self CPU, arg1 voidptr, arg2 voidptr) {
 
 fn instruction_add_with_carry_to_a(mut self CPU, arg1 voidptr, arg2 voidptr) {
 	unsafe {
-		value := *(&u8(arg1)) + u8(get_cpu_flag(mut self, CPU_FLAGS.c))
-		set_cpu_flag(mut self, CPU_FLAGS.c, int(0xFF - self.reg.a < value))
-		set_cpu_flag(mut self, CPU_FLAGS.h, int((((self.reg.a & 0xF) + (value & 0xF)) & 0x10) == 0x10))
-		self.reg.a += value
+		old_carry := u8(get_cpu_flag(mut self, CPU_FLAGS.c))
+		set_cpu_flag(mut self, CPU_FLAGS.h, int((((self.reg.a & 0xF) + (*(&u8(arg1)) & 0xF) + u8(get_cpu_flag(mut self, CPU_FLAGS.c))) & 0x10) == 0x10))
+		set_cpu_flag(mut self, CPU_FLAGS.c, int(0xFF < int(get_cpu_flag(mut self, CPU_FLAGS.c)) + self.reg.a + *(&u8(arg1))))
+		self.reg.a += *(&u8(arg1)) + old_carry
 		set_cpu_flag(mut self, CPU_FLAGS.z, int(self.reg.a == 0))
 		set_cpu_flag(mut self, CPU_FLAGS.n, 0)
 	}
