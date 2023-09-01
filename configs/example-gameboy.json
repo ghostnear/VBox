@@ -1,6 +1,6 @@
 {
     "emu_type": "gameboy",
-    "rom_path": "./roms/gb/test/cpu_instrs/individual/11-op a,(hl).gb",
+    "rom_path": "./roms/gb/test/cpu_instrs/individual/03-op sp,hl.gb",
     "bios_path": "",
     "debug_log_file": "./gameboy-doctor/vbox.log"
 }

@@ -21,7 +21,6 @@ enum CPU_CONDITIONS {
 }
 
 /// Functions for working with the CPU flags.
-
 [inline]
 fn set_cpu_flag(mut self CPU, flag CPU_FLAGS, value int) {
 	utils.set_bit(&self.reg.f, int(flag), value)
@@ -33,7 +32,6 @@ fn get_cpu_flag(mut self CPU, flag CPU_FLAGS) int {
 }
 
 /// Unknown CPU opcodes.
-
 fn unknown_cb_opcode(mut self CPU, arg1 voidptr, arg2 voidptr) {
 	opcode := self.ram.read_byte(self.pc - 1)
 	println('ERROR: Unknown CB opcode ${opcode:02X} detected at PC ${self.pc - 2:04X}!')
@@ -63,7 +61,6 @@ fn unknown_opcode(mut self CPU, arg1 voidptr, arg2 voidptr) {
 }
 
 /// Actual instructions.
-
 fn instruction_add_to_a(mut self CPU, arg1 voidptr, arg2 voidptr) {
 	unsafe {
 		set_cpu_flag(mut self, CPU_FLAGS.c, int(0xFF - self.reg.a < *(&u8(arg1))))
@@ -77,8 +74,10 @@ fn instruction_add_to_a(mut self CPU, arg1 voidptr, arg2 voidptr) {
 fn instruction_add_with_carry_to_a(mut self CPU, arg1 voidptr, arg2 voidptr) {
 	unsafe {
 		old_carry := u8(get_cpu_flag(mut self, CPU_FLAGS.c))
-		set_cpu_flag(mut self, CPU_FLAGS.h, int((((self.reg.a & 0xF) + (*(&u8(arg1)) & 0xF) + u8(get_cpu_flag(mut self, CPU_FLAGS.c))) & 0x10) == 0x10))
-		set_cpu_flag(mut self, CPU_FLAGS.c, int(0xFF < int(get_cpu_flag(mut self, CPU_FLAGS.c)) + self.reg.a + *(&u8(arg1))))
+		set_cpu_flag(mut self, CPU_FLAGS.h, int((((self.reg.a & 0xF) + (*(&u8(arg1)) & 0xF) +
+			u8(get_cpu_flag(mut self, CPU_FLAGS.c))) & 0x10) == 0x10))
+		set_cpu_flag(mut self, CPU_FLAGS.c, int(0xFF < int(get_cpu_flag(mut self, CPU_FLAGS.c)) +
+			self.reg.a + *(&u8(arg1))))
 		self.reg.a += *(&u8(arg1)) + old_carry
 		set_cpu_flag(mut self, CPU_FLAGS.z, int(self.reg.a == 0))
 		set_cpu_flag(mut self, CPU_FLAGS.n, 0)
@@ -99,7 +98,8 @@ fn instruction_sub_with_carry_from_a(mut self CPU, arg1 voidptr, arg2 voidptr) {
 	unsafe {
 		old_carry := u8(get_cpu_flag(mut self, CPU_FLAGS.c))
 		set_cpu_flag(mut self, CPU_FLAGS.h, int(self.reg.a & 0xF < (*(&u8(arg1)) & 0xF) + old_carry))
-		set_cpu_flag(mut self, CPU_FLAGS.c, int(self.reg.a < int(get_cpu_flag(mut self, CPU_FLAGS.c)) + *(&u8(arg1))))
+		set_cpu_flag(mut self, CPU_FLAGS.c, int(self.reg.a <
+			int(get_cpu_flag(mut self, CPU_FLAGS.c)) + *(&u8(arg1))))
 		self.reg.a -= *(&u8(arg1)) + old_carry
 		set_cpu_flag(mut self, CPU_FLAGS.z, int(self.reg.a == 0))
 		set_cpu_flag(mut self, CPU_FLAGS.n, 1)
@@ -144,10 +144,23 @@ fn instruction_cp_with_a(mut self CPU, arg1 voidptr, arg2 voidptr) {
 	set_cpu_flag(mut self, CPU_FLAGS.c, int(self.reg.a < *(&u8(arg1))))
 }
 
+fn instruction_ld_16(mut self CPU, arg1 voidptr, arg2 voidptr) {
+	unsafe {
+		*(&u16(arg1)) = *(&u16(arg2))
+	}
+}
+
 fn instruction_ld_16imm(mut self CPU, arg1 voidptr, arg2 voidptr) {
 	unsafe {
 		*(&u16(arg1)) = u16(arg2)
 	}
+}
+
+fn instruction_conditional_jump(mut self CPU, arg1 voidptr, arg2 voidptr) {
+	if check_flag(mut self, CPU_CONDITIONS(arg1)) == false {
+		return
+	}
+	self.pc = u16(arg1)
 }
 
 fn instruction_direct_jump(mut self CPU, arg1 voidptr, arg2 voidptr) {
@@ -195,30 +208,6 @@ fn instruction_ld_8imm(mut self CPU, arg1 voidptr, arg2 voidptr) {
 	}
 }
 
-fn instruction_ld_hl_m_a(mut self CPU, arg1 voidptr, arg2 voidptr) {
-	unsafe {
-		mut hl := &u16(&self.reg.l)
-		self.ram.write_byte(*hl, self.reg.a)
-		(*hl)--
-	}
-}
-
-fn instruction_ld_hl_p_a(mut self CPU, arg1 voidptr, arg2 voidptr) {
-	unsafe {
-		mut hl := &u16(&self.reg.l)
-		self.ram.write_byte(*hl, self.reg.a)
-		(*hl)++
-	}
-}
-
-fn instruction_ld_a_hl_p(mut self CPU, arg1 voidptr, arg2 voidptr) {
-	unsafe {
-		mut hl := &u16(&self.reg.l)
-		self.reg.a = self.ram.read_byte(*hl)
-		(*hl)++
-	}
-}
-
 fn instruction_set_interrupts(mut self CPU, arg1 voidptr, arg2 voidptr) {
 	self.ram.write_byte(0xFFFF, arg1)
 }
@@ -234,6 +223,11 @@ fn instruction_inc(mut self CPU, arg1 voidptr, arg2 voidptr) {
 fn instruction_inc_16(mut self CPU, arg1 voidptr, arg2 voidptr) {
 	addr := &u16(arg1)
 	(*addr)++
+}
+
+fn instruction_dec_16(mut self CPU, arg1 voidptr, arg2 voidptr) {
+	addr := &u16(arg1)
+	(*addr)--
 }
 
 fn check_flag(mut self CPU, flag CPU_CONDITIONS) bool {
@@ -277,7 +271,7 @@ fn instruction_relative_jump(mut self CPU, arg1 voidptr, arg2 voidptr) {
 	old_pc := self.pc - 1
 	self.pc += 1 + u16(i16(i8(arg1)))
 	if old_pc == self.pc {
-		println("WARN: Infinite jump detected. Stopping!")
+		println('WARN: Infinite jump detected. Stopping!')
 		exit(0)
 	}
 }
@@ -312,6 +306,60 @@ fn instruction_ret(mut self CPU, arg1 voidptr, arg2 voidptr) {
 	instruction_pop(mut self, &self.pc, arg2)
 }
 
+fn instruction_scf(mut self CPU, arg1 voidptr, arg2 voidptr) {
+	set_cpu_flag(mut self, CPU_FLAGS.n, 0)
+	set_cpu_flag(mut self, CPU_FLAGS.h, 0)
+	set_cpu_flag(mut self, CPU_FLAGS.c, 1)
+}
+
+fn instruction_ccf(mut self CPU, arg1 voidptr, arg2 voidptr) {
+	set_cpu_flag(mut self, CPU_FLAGS.n, 0)
+	set_cpu_flag(mut self, CPU_FLAGS.h, 0)
+	set_cpu_flag(mut self, CPU_FLAGS.c, int(!(get_cpu_flag(mut self, CPU_FLAGS.c) != 0)))
+}
+
+fn instruction_cpl(mut self CPU, arg1 voidptr, arg2 voidptr) {
+	unsafe {
+		*(&u8(arg1)) = ~*(&u8(arg1))
+	}
+	set_cpu_flag(mut self, CPU_FLAGS.h, 1)
+	set_cpu_flag(mut self, CPU_FLAGS.n, 1)
+}
+
+fn instruction_rotate_left_carry_a(mut self CPU, arg1 voidptr, arg2 voidptr) {
+	unsafe {
+		set_cpu_flag(mut self, CPU_FLAGS.c, utils.get_bit(self.reg.a, 7))
+		self.reg.a <<= 1
+		utils.set_bit(&self.reg.a, 0, get_cpu_flag(mut self, CPU_FLAGS.c))
+		set_cpu_flag(mut self, CPU_FLAGS.n, 0)
+		set_cpu_flag(mut self, CPU_FLAGS.h, 0)
+		set_cpu_flag(mut self, CPU_FLAGS.z, 0)
+	}
+}
+
+fn instruction_rotate_right_carry_a(mut self CPU, arg1 voidptr, arg2 voidptr) {
+	unsafe {
+		set_cpu_flag(mut self, CPU_FLAGS.c, self.reg.a & 1)
+		self.reg.a >>= 1
+		utils.set_bit(&self.reg.a, 7, get_cpu_flag(mut self, CPU_FLAGS.c))
+		set_cpu_flag(mut self, CPU_FLAGS.n, 0)
+		set_cpu_flag(mut self, CPU_FLAGS.h, 0)
+		set_cpu_flag(mut self, CPU_FLAGS.z, 0)
+	}
+}
+
+fn instruction_rotate_left_a(mut self CPU, arg1 voidptr, arg2 voidptr) {
+	unsafe {
+		old_carry := get_cpu_flag(mut self, CPU_FLAGS.c)
+		set_cpu_flag(mut self, CPU_FLAGS.c, utils.get_bit(self.reg.a, 7))
+		self.reg.a <<= 1
+		utils.set_bit(&self.reg.a, 0, old_carry)
+		set_cpu_flag(mut self, CPU_FLAGS.n, 0)
+		set_cpu_flag(mut self, CPU_FLAGS.h, 0)
+		set_cpu_flag(mut self, CPU_FLAGS.z, 0)
+	}
+}
+
 fn instruction_rotate_right_a(mut self CPU, arg1 voidptr, arg2 voidptr) {
 	unsafe {
 		old_carry := get_cpu_flag(mut self, CPU_FLAGS.c)
@@ -329,6 +377,30 @@ fn instruction_cb_test_bit(mut self CPU, arg1 voidptr, arg2 voidptr) {
 	set_cpu_flag(mut self, CPU_FLAGS.z, int(utils.get_bit(*&u8(arg2), arg1) == 0))
 	set_cpu_flag(mut self, CPU_FLAGS.n, 0)
 	set_cpu_flag(mut self, CPU_FLAGS.h, 1)
+}
+
+fn instruction_cb_rotate_left_carry(mut self CPU, arg1 voidptr, arg2 voidptr) {
+	unsafe {
+		value := &u8(arg1)
+		set_cpu_flag(mut self, CPU_FLAGS.c, utils.get_bit(*value, 7))
+		*value <<= 1
+		utils.set_bit(value, 0, get_cpu_flag(mut self, CPU_FLAGS.c))
+		set_cpu_flag(mut self, CPU_FLAGS.n, 0)
+		set_cpu_flag(mut self, CPU_FLAGS.h, 0)
+		set_cpu_flag(mut self, CPU_FLAGS.z, int(*value == 0))
+	}
+}
+
+fn instruction_cb_rotate_right_carry(mut self CPU, arg1 voidptr, arg2 voidptr) {
+	unsafe {
+		value := &u8(arg1)
+		set_cpu_flag(mut self, CPU_FLAGS.c, (*value) & 1)
+		*value >>= 1
+		utils.set_bit(value, 7, get_cpu_flag(mut self, CPU_FLAGS.c))
+		set_cpu_flag(mut self, CPU_FLAGS.n, 0)
+		set_cpu_flag(mut self, CPU_FLAGS.h, 0)
+		set_cpu_flag(mut self, CPU_FLAGS.z, int(*value == 0))
+	}
 }
 
 fn instruction_cb_rotate_left(mut self CPU, arg1 voidptr, arg2 voidptr) {
@@ -365,6 +437,37 @@ fn instruction_cb_shift_logical_right(mut self CPU, arg1 voidptr, arg2 voidptr) 
 		*(&u8(arg1)) >>= 1
 		set_cpu_flag(mut self, CPU_FLAGS.z, int(*(&u8(arg1)) == 0))
 	}
+}
+
+fn instruction_cb_shift_left_arithmetic(mut self CPU, arg1 voidptr, arg2 voidptr) {
+	set_cpu_flag(mut self, CPU_FLAGS.c, (*&u8(arg1)) & (1 << 7) >> 7)
+	unsafe {
+		*&u8(arg1) <<= 1
+	}
+	set_cpu_flag(mut self, CPU_FLAGS.n, 0)
+	set_cpu_flag(mut self, CPU_FLAGS.h, 0)
+	set_cpu_flag(mut self, CPU_FLAGS.z, int(*&u8(arg1) == 0))
+}
+
+fn instruction_cb_shift_right_arithmetic(mut self CPU, arg1 voidptr, arg2 voidptr) {
+	set_cpu_flag(mut self, CPU_FLAGS.c, (*&u8(arg1)) & 1)
+	unsafe {
+		*&i8(arg1) >>= 1
+	}
+	set_cpu_flag(mut self, CPU_FLAGS.n, 0)
+	set_cpu_flag(mut self, CPU_FLAGS.h, 0)
+	set_cpu_flag(mut self, CPU_FLAGS.z, int(*&u8(arg1) == 0))
+}
+
+fn instruction_cb_swap(mut self CPU, arg1 voidptr, arg2 voidptr) {
+	mut result := u8(0)
+	result |= (*&u8(arg1) & 0xF) << 4
+	result |= (*&u8(arg1) & 0xF0) >> 4
+	(*&u8(arg1)) = result
+	set_cpu_flag(mut self, CPU_FLAGS.c, 0)
+	set_cpu_flag(mut self, CPU_FLAGS.n, 0)
+	set_cpu_flag(mut self, CPU_FLAGS.h, 0)
+	set_cpu_flag(mut self, CPU_FLAGS.z, int(result == 0))
 }
 
 fn instruction_cb_set_bit(mut self CPU, arg1 voidptr, arg2 voidptr) {

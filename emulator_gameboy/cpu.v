@@ -36,11 +36,16 @@ mut:
 	// Registers are stored here.
 	reg Registers
 	// Instruction decoding tables.
-	rot_table []fn (mut self CPU, arg1 voidptr, arg2 voidptr) // Rotation / shift operations.
-	alu_table []fn (mut self CPU, arg1 voidptr, arg2 voidptr) // Arithmetic / logic operations.
-	rp_table  []&u16 //
-	rp2_table []&u16 // 16 bit register tables.
-	reg_table []&u8  // 8 bit register table.
+	rot_table []fn (mut self CPU, arg1 voidptr, arg2 voidptr)
+	// Rotation / shift operations.
+	alu_table []fn (mut self CPU, arg1 voidptr, arg2 voidptr)
+	// Arithmetic / logic operations.
+	rp_table []&u16
+	//
+	rp2_table []&u16
+	// 16 bit register tables.
+	reg_table []&u8
+	// 8 bit register table.
 	// For debug logging only.
 	debug os.File
 }
@@ -75,17 +80,18 @@ fn (mut self CPU) init() {
 		&self.reg.e,
 		&self.reg.h,
 		&self.reg.l,
-		0, // This is fixed by update_hl_reg()
+		0,
+		// This is fixed by update_hl_reg()
 		&self.reg.a,
 	]
 	self.rot_table = [
-		unknown_cb_opcode,
-		unknown_cb_opcode,
+		instruction_cb_rotate_left_carry,
+		instruction_cb_rotate_right_carry,
 		instruction_cb_rotate_left,
 		instruction_cb_rotate_right,
-		unknown_cb_opcode,
-		unknown_cb_opcode,
-		unknown_cb_opcode,
+		instruction_cb_shift_left_arithmetic,
+		instruction_cb_shift_right_arithmetic,
+		instruction_cb_swap,
 		instruction_cb_shift_logical_right,
 	]
 }
@@ -131,6 +137,15 @@ fn (mut self CPU) decode_opcode(opcode u16) Instruction {
 						0 {
 							return Instruction{
 								func: instruction_nop
+							}
+						}
+						1 {
+							data := self.ram.read_word(self.pc)
+							self.pc += 2
+							return Instruction{
+								func: instruction_ld_16
+								arg1: self.ram.get_pointer(data)
+								arg2: &self.sp
 							}
 						}
 						2 {
@@ -182,6 +197,15 @@ fn (mut self CPU) decode_opcode(opcode u16) Instruction {
 					match q {
 						0 {
 							match p {
+								0 {
+									unsafe {
+										return Instruction{
+											func: instruction_ld_8
+											arg1: self.ram.get_pointer(*&u16(&self.reg.c))
+											arg2: &self.reg.a
+										}
+									}
+								}
 								1 {
 									unsafe {
 										return Instruction{
@@ -192,13 +216,25 @@ fn (mut self CPU) decode_opcode(opcode u16) Instruction {
 									}
 								}
 								2 {
-									return Instruction{
-										func: instruction_ld_hl_p_a
+									unsafe {
+										hl := &u16(&self.reg.l)
+										(*hl)++
+										return Instruction{
+											func: instruction_ld_8
+											arg1: self.ram.get_pointer((*hl) - 1)
+											arg2: &self.reg.a
+										}
 									}
 								}
 								3 {
-									return Instruction{
-										func: instruction_ld_hl_m_a
+									unsafe {
+										hl := &u16(&self.reg.l)
+										(*hl)--
+										return Instruction{
+											func: instruction_ld_8
+											arg1: self.ram.get_pointer((*hl) + 1)
+											arg2: &self.reg.a
+										}
 									}
 								}
 								else {}
@@ -206,6 +242,15 @@ fn (mut self CPU) decode_opcode(opcode u16) Instruction {
 						}
 						1 {
 							match p {
+								0 {
+									unsafe {
+										return Instruction{
+											func: instruction_ld_8
+											arg1: &self.reg.a
+											arg2: self.ram.get_pointer(*&u16(&self.reg.c))
+										}
+									}
+								}
 								1 {
 									unsafe {
 										return Instruction{
@@ -216,8 +261,25 @@ fn (mut self CPU) decode_opcode(opcode u16) Instruction {
 									}
 								}
 								2 {
-									return Instruction{
-										func: instruction_ld_a_hl_p
+									unsafe {
+										hl := &u16(&self.reg.l)
+										(*hl)++
+										return Instruction{
+											func: instruction_ld_8
+											arg1: &self.reg.a
+											arg2: self.ram.get_pointer((*hl) - 1)
+										}
+									}
+								}
+								3 {
+									unsafe {
+										hl := &u16(&self.reg.l)
+										(*hl)--
+										return Instruction{
+											func: instruction_ld_8
+											arg1: &self.reg.a
+											arg2: self.ram.get_pointer((*hl) + 1)
+										}
 									}
 								}
 								else {}
@@ -234,18 +296,22 @@ fn (mut self CPU) decode_opcode(opcode u16) Instruction {
 								arg1: self.rp_table[p]
 							}
 						}
+						1 {
+							return Instruction{
+								func: instruction_dec_16
+								arg1: self.rp_table[p]
+							}
+						}
 						else {}
 					}
 				}
 				4 {
-					self.update_hl_reg()
 					return Instruction{
 						func: instruction_inc
 						arg1: self.reg_table[y]
 					}
 				}
 				5 {
-					self.update_hl_reg()
 					return Instruction{
 						func: instruction_dec
 						arg1: self.reg_table[y]
@@ -254,8 +320,6 @@ fn (mut self CPU) decode_opcode(opcode u16) Instruction {
 				6 {
 					data := self.ram.read_byte(self.pc)
 					self.pc += 1
-
-					self.update_hl_reg()
 					return Instruction{
 						func: instruction_ld_8imm
 						arg1: self.reg_table[y]
@@ -264,15 +328,40 @@ fn (mut self CPU) decode_opcode(opcode u16) Instruction {
 				}
 				7 {
 					match y {
+						0 {
+							return Instruction{
+								func: instruction_rotate_left_carry_a
+							}
+						}
+						1 {
+							return Instruction{
+								func: instruction_rotate_right_carry_a
+							}
+						}
 						2 {
 							return Instruction{
-								func: instruction_cb_rotate_left
-								arg1: &self.reg.a
+								func: instruction_rotate_left_a
 							}
 						}
 						3 {
 							return Instruction{
 								func: instruction_rotate_right_a
+							}
+						}
+						5 {
+							return Instruction{
+								func: instruction_cpl
+								arg1: &self.reg.a
+							}
+						}
+						6 {
+							return Instruction{
+								func: instruction_scf
+							}
+						}
+						7 {
+							return Instruction{
+								func: instruction_ccf
 							}
 						}
 						else {}
@@ -288,7 +377,6 @@ fn (mut self CPU) decode_opcode(opcode u16) Instruction {
 					func: instruction_nop
 				}
 			}
-			self.update_hl_reg()
 			return Instruction{
 				func: instruction_ld_8
 				arg1: self.reg_table[y]
@@ -296,7 +384,6 @@ fn (mut self CPU) decode_opcode(opcode u16) Instruction {
 			}
 		}
 		2 {
-			self.update_hl_reg()
 			return Instruction{
 				func: self.alu_table[y]
 				arg1: self.reg_table[z]
@@ -354,6 +441,13 @@ fn (mut self CPU) decode_opcode(opcode u16) Instruction {
 										arg1: unsafe { *&u16(&self.reg.l) }
 									}
 								}
+								3 {
+									return Instruction{
+										func: instruction_ld_16
+										arg1: &self.sp
+										arg2: unsafe { &u16(&self.reg.l) }
+									}
+								}
 								else {}
 							}
 						}
@@ -362,6 +456,22 @@ fn (mut self CPU) decode_opcode(opcode u16) Instruction {
 				}
 				2 {
 					match y {
+						0...3 {
+							data := self.ram.read_word(self.pc)
+							self.pc += 2
+							return Instruction{
+								func: instruction_conditional_jump
+								arg1: y
+								arg2: data
+							}
+						}
+						4 {
+							return Instruction{
+								func: instruction_ld_8
+								arg1: self.ram.get_pointer(u16(0xFF00) + self.reg.c)
+								arg2: &self.reg.a
+							}
+						}
 						5 {
 							data := self.ram.read_word(self.pc)
 							self.pc += 2
@@ -369,6 +479,13 @@ fn (mut self CPU) decode_opcode(opcode u16) Instruction {
 								func: instruction_ld_8
 								arg1: self.ram.get_pointer(data)
 								arg2: &self.reg.a
+							}
+						}
+						6 {
+							return Instruction{
+								func: instruction_ld_8
+								arg1: &self.reg.a
+								arg2: self.ram.get_pointer(u16(0xFF00) + self.reg.c)
 							}
 						}
 						7 {
@@ -466,14 +583,12 @@ fn (mut self CPU) decode_cb_opcode(opcode u16) Instruction {
 
 	match x {
 		0 {
-			self.update_hl_reg()
 			return Instruction{
 				func: self.rot_table[y]
 				arg1: self.reg_table[z]
 			}
 		}
 		1 {
-			self.update_hl_reg()
 			return Instruction{
 				func: instruction_cb_test_bit
 				arg1: y
@@ -481,7 +596,6 @@ fn (mut self CPU) decode_cb_opcode(opcode u16) Instruction {
 			}
 		}
 		2 {
-			self.update_hl_reg()
 			return Instruction{
 				func: instruction_cb_reset_bit
 				arg1: y
@@ -489,7 +603,6 @@ fn (mut self CPU) decode_cb_opcode(opcode u16) Instruction {
 			}
 		}
 		3 {
-			self.update_hl_reg()
 			return Instruction{
 				func: instruction_cb_set_bit
 				arg1: y
@@ -509,6 +622,9 @@ pub fn (mut self CPU) step() {
 	if self.debug.is_opened {
 		self.log_current_status()
 	}
+
+	// Update tables.
+	self.update_hl_reg()
 
 	// Fetch opcode.
 	mut opcode := self.ram.read_byte(self.pc)
