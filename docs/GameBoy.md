@@ -23,6 +23,7 @@
             - [x] 05-op rp.gb
             - [x] 06-ld r,r.gb
             - [ ] 07-jr,jp,call,ret,rst.gb
+                - Mismatch in CPU state at line 205978 (previous opcode: 0xF1 POP AF)
                 - unimplemented opcode
             - [ ] 08-misc instrs.gb
                 - Mismatch in CPU state at line 208109 (previous opcode: 0xF1 POP AF)
