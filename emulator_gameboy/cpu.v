@@ -480,6 +480,22 @@ fn (mut self CPU) decode_cb_opcode(opcode u16) Instruction {
 				arg2: self.reg_table[z]
 			}
 		}
+		2 {
+			self.update_hl_reg()
+			return Instruction{
+				func: instruction_cb_reset_bit
+				arg1: y
+				arg2: self.reg_table[z]
+			}
+		}
+		3 {
+			self.update_hl_reg()
+			return Instruction{
+				func: instruction_cb_set_bit
+				arg1: y
+				arg2: self.reg_table[z]
+			}
+		}
 		else {}
 	}
 

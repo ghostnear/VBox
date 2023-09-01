@@ -326,7 +326,7 @@ fn instruction_rotate_right_a(mut self CPU, arg1 voidptr, arg2 voidptr) {
 
 fn instruction_cb_test_bit(mut self CPU, arg1 voidptr, arg2 voidptr) {
 	// Set flags and move on
-	set_cpu_flag(mut self, CPU_FLAGS.z, utils.get_bit(*&u8(arg2), arg1))
+	set_cpu_flag(mut self, CPU_FLAGS.z, int(utils.get_bit(*&u8(arg2), arg1) == 0))
 	set_cpu_flag(mut self, CPU_FLAGS.n, 0)
 	set_cpu_flag(mut self, CPU_FLAGS.h, 1)
 }
@@ -365,4 +365,12 @@ fn instruction_cb_shift_logical_right(mut self CPU, arg1 voidptr, arg2 voidptr) 
 		*(&u8(arg1)) >>= 1
 		set_cpu_flag(mut self, CPU_FLAGS.z, int(*(&u8(arg1)) == 0))
 	}
+}
+
+fn instruction_cb_set_bit(mut self CPU, arg1 voidptr, arg2 voidptr) {
+	utils.set_bit(&u8(arg2), arg1, 1)
+}
+
+fn instruction_cb_reset_bit(mut self CPU, arg1 voidptr, arg2 voidptr) {
+	utils.set_bit(&u8(arg2), arg1, 0)
 }
