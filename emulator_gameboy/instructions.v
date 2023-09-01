@@ -47,21 +47,6 @@ fn unknown_cb_opcode(mut self CPU, arg1 voidptr, arg2 voidptr) {
 	exit(0)
 }
 
-fn unknown_alu_opcode(mut self CPU, arg1 voidptr, arg2 voidptr) {
-	opcode := self.ram.read_byte(self.pc - 2)
-	println('ERROR: Unknown ALU opcode ${opcode:02X} detected at PC ${self.pc - 2:04X}!')
-
-	x := opcode >> 6
-	y := (opcode >> 3) & 0b111
-	z := opcode & 0b111
-	p := y >> 1
-	q := y & 0b1
-
-	println('WARN: Debug data (x: ${x}, y: ${y}, z: ${z}, p: ${p}, q: ${q})')
-
-	exit(0)
-}
-
 fn unknown_opcode(mut self CPU, arg1 voidptr, arg2 voidptr) {
 	opcode := self.ram.read_byte(self.pc - 1)
 	println('ERROR: Unknown opcode ${opcode:02X} detected at PC ${self.pc - 1:04X}!')
@@ -105,6 +90,17 @@ fn instruction_sub_from_a(mut self CPU, arg1 voidptr, arg2 voidptr) {
 		set_cpu_flag(mut self, CPU_FLAGS.c, int(self.reg.a < *(&u8(arg1))))
 		set_cpu_flag(mut self, CPU_FLAGS.h, int((self.reg.a & 0xF) < (*(&u8(arg1)) & 0xF)))
 		self.reg.a -= *(&u8(arg1))
+		set_cpu_flag(mut self, CPU_FLAGS.z, int(self.reg.a == 0))
+		set_cpu_flag(mut self, CPU_FLAGS.n, 1)
+	}
+}
+
+fn instruction_sub_with_carry_from_a(mut self CPU, arg1 voidptr, arg2 voidptr) {
+	unsafe {
+		old_carry := u8(get_cpu_flag(mut self, CPU_FLAGS.c))
+		set_cpu_flag(mut self, CPU_FLAGS.h, int(self.reg.a & 0xF < (*(&u8(arg1)) & 0xF) + old_carry))
+		set_cpu_flag(mut self, CPU_FLAGS.c, int(self.reg.a < int(get_cpu_flag(mut self, CPU_FLAGS.c)) + *(&u8(arg1))))
+		self.reg.a -= *(&u8(arg1)) + old_carry
 		set_cpu_flag(mut self, CPU_FLAGS.z, int(self.reg.a == 0))
 		set_cpu_flag(mut self, CPU_FLAGS.n, 1)
 	}
@@ -278,7 +274,12 @@ fn instruction_dec(mut self CPU, arg1 voidptr, arg2 voidptr) {
 }
 
 fn instruction_relative_jump(mut self CPU, arg1 voidptr, arg2 voidptr) {
+	old_pc := self.pc - 1
 	self.pc += 1 + u16(i16(i8(arg1)))
+	if old_pc == self.pc {
+		println("WARN: Infinite jump detected. Stopping!")
+		exit(0)
+	}
 }
 
 fn instruction_conditional_relative_jump(mut self CPU, arg1 voidptr, arg2 voidptr) {

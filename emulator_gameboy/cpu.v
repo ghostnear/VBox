@@ -62,7 +62,7 @@ fn (mut self CPU) init() {
 		instruction_add_to_a,
 		instruction_add_with_carry_to_a,
 		instruction_sub_from_a,
-		unknown_alu_opcode,
+		instruction_sub_with_carry_from_a,
 		instruction_and_with_a,
 		instruction_xor_with_a,
 		instruction_or_with_a,
