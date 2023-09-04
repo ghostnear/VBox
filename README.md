@@ -15,4 +15,4 @@ Also beware as I am preparing this for the actual 1.0.0, stuff is gonna be unfin
 
 ### 1.0.0
 
-- Gameboy emulator 'working'.
+- everything already coded to be fully functional.
