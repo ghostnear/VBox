@@ -42,7 +42,7 @@ fn unknown_cb_opcode(mut self CPU, arg1 voidptr, arg2 voidptr) {
 
 	println('WARN: Debug data (x: ${x}, y: ${y}, z: ${z})')
 
-	exit(0)
+	exit(-1)
 }
 
 fn unknown_opcode(mut self CPU, arg1 voidptr, arg2 voidptr) {
@@ -57,7 +57,7 @@ fn unknown_opcode(mut self CPU, arg1 voidptr, arg2 voidptr) {
 
 	println('WARN: Debug data (x: ${x}, y: ${y}, z: ${z}, p: ${p}, q: ${q})')
 
-	exit(0)
+	exit(-1)
 }
 
 /// Actual instructions.
@@ -272,7 +272,7 @@ fn instruction_relative_jump(mut self CPU, arg1 voidptr, arg2 voidptr) {
 	self.pc += 1 + u16(i16(i8(arg1)))
 	if old_pc == self.pc {
 		println('WARN: Infinite jump detected. Stopping!')
-		exit(0)
+		exit(-1)
 	}
 }
 

@@ -1,6 +1,7 @@
 module emulator_gameboy
 
 import os
+import sdl
 import sdl_driver
 import emulator_gameboy.mappers
 import utils
@@ -50,6 +51,13 @@ pub fn create_emulator(config Config) &Emulator {
 
 	// Done.
 	return result
+}
+
+fn (mut self Emulator) set_window(window &sdl_driver.Window) {
+	self.window = window
+}
+
+pub fn (mut self Emulator) on_event(event &sdl.Event) {
 }
 
 fn (mut self Emulator) load_rom(path string) {

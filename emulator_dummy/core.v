@@ -21,10 +21,13 @@ pub fn create_emulator(config Config) &Emulator {
 pub fn (mut self Emulator) draw() {
 }
 
+pub fn (mut self Emulator) poll_events() {
+}
+
 pub fn (mut self Emulator) update() {
 	if !self.shown_error {
 		println('WARN: Dummy emulator does nothing...')
-		self.shown_error = false
+		self.shown_error = true
 	}
 }
 
