@@ -10,10 +10,6 @@ fn unknown_opcode(mut self CPU, opcode u16) {
 
 [inline]
 pub fn (mut self CPU) populate_instruction_tables() {
-	for index in 0x00 .. 0x10 {
-		self.instruction_table[index] = unknown_opcode
-	}
-
 	// System calls
 	self.instruction_table[0x0] = fn (mut self CPU, opcode u16) {
 		match opcode & 0xFF {
@@ -153,7 +149,7 @@ pub fn (mut self CPU) populate_instruction_tables() {
 	// 9XY0 - SKPNE VX, VY
 	self.instruction_table[0x9] = fn (mut self CPU, opcode u16) {
 		if opcode & 0xF != 0 {
-			return
+			unknown_opcode(mut self, opcode)
 		}
 
 		if self.v[opcode & 0xF00 >> 8] != self.v[opcode & 0xF0 >> 4] {
@@ -166,18 +162,25 @@ pub fn (mut self CPU) populate_instruction_tables() {
 		self.i = opcode & 0xFFF
 	}
 
-	// BXNN - JMP VX + NN
+	// BXNN - JMP V0 + NNN
 	self.instruction_table[0xB] = fn (mut self CPU, opcode u16) {
 		self.pc = u16(self.v[0]) + opcode & 0xFFF
 	}
 
-	// CXNN - JMP VX + NN
+	// CXNN - LD VX, RND NN
 	self.instruction_table[0xC] = fn (mut self CPU, opcode u16) {
-		self.v[(opcode & 0xF00) >> 8] = rand.u8() % u8(opcode & 0xFF)
+		self.v[(opcode & 0xF00) >> 8] = 1
 	}
 
 	// DXYN - DRW VX, VY, N
 	self.instruction_table[0xD] = fn (mut self CPU, opcode u16) {
+		if self.vsync_timer.get_value() != 0 {
+			self.pc -= 2
+			return
+		}
+
+		self.vsync_timer.set_value(1)
+
 		self.v[0xF] = 0x00
 
 		x_pos := self.v[(opcode & 0xF00) >> 8] % self.ppu.width
@@ -187,7 +190,7 @@ pub fn (mut self CPU) populate_instruction_tables() {
 		for index in 0 .. opcode & 0xF {
 			bytevalue := self.ram.read_byte(self.i + index)
 			for bit in 0 .. 8 {
-				if (bytevalue & (1 << (7 - bit))) != 0 {
+				if (bytevalue >> (7 - bit)) & 1 != 0 {
 					self.ppu.draw_flag = true
 					if self.ppu.xor_pixel(x_pos + bit, y_pos + index) == true {
 						self.v[0xF] = 1
@@ -221,14 +224,14 @@ pub fn (mut self CPU) populate_instruction_tables() {
 	// FXNN - Special opcodes
 	self.instruction_table[0xF] = fn (mut self CPU, opcode u16) {
 		match opcode & 0xFF {
+			// LD VX, DT
+			0x07 {
+				self.v[(opcode & 0xF00) >> 8] = self.delta_timer.get_value()
+			}
 			// GETKEY VX
 			0x0A {
 				self.halt_flag = true
 				self.key_register = u8((opcode & 0xF00) >> 8)
-			}
-			// LD VX, DT
-			0x07 {
-				self.v[(opcode & 0xF00) >> 8] = self.delta_timer.get_value()
 			}
 			// LD DT, VX
 			0x15 {
@@ -240,11 +243,13 @@ pub fn (mut self CPU) populate_instruction_tables() {
 			}
 			// ADD I, VX
 			0x1E {
+				println(self.v[3])
+				println('${self.v[(opcode & 0xF00) >> 8]:02X}')
 				self.i += self.v[(opcode & 0xF00) >> 8]
 			}
 			// LD I, hex(VX)
 			0x29 {
-				self.i = self.v[(opcode & 0xF00) >> 8] * 5
+				self.i = u16(self.v[(opcode & 0xF00) >> 8]) * 5
 			}
 			// BCD VX, [I]
 			0x33 {

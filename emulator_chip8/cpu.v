@@ -21,20 +21,21 @@ mut:
 	key_register    u8 = 0xFF
 	key_to_wait_for u8 = 0xFF
 	// Internal timers
-	timer f64
+	timer            f64
 	instruction_rate f64 = 500.0
+	vsync_timer      Timer
 }
 
 pub fn (mut self CPU) update(delta f64) {
-	self.timer += delta
-	for self.timer > 1.0 / self.instruction_rate {
-		self.step()
-		self.timer -= 1.0 / self.instruction_rate
-	}
-}
+	self.vsync_timer.update(delta)
 
-fn (mut self CPU) step() {
-	if self.halt_flag {
+	if !self.halt_flag {
+		self.timer += delta
+		for self.timer > 1.0 / self.instruction_rate && !self.halt_flag {
+			self.step()
+			self.timer -= 1.0 / self.instruction_rate
+		}
+	} else {
 		if self.key_register != 0xFF {
 			if self.key_to_wait_for == 0xFF {
 				self.key_to_wait_for = self.input.get_first_key_pressed()
@@ -50,7 +51,9 @@ fn (mut self CPU) step() {
 		}
 		return
 	}
+}
 
+fn (mut self CPU) step() {
 	opcode := self.ram.read_word(self.pc)
 	self.pc += 2
 

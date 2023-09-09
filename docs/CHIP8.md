@@ -9,6 +9,8 @@
 
 ## Passed tests:
 
+- Has a weird display bug in the Tetris ROM.
+
 - [ ] Timendus' CHIP8 test suite
     - [x] CHIP8 logo.
     - [x] IBM logo.

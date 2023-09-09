@@ -49,12 +49,12 @@ pub fn (mut self PPU) xor_pixel(pos_x int, pos_y int) bool {
 	x := pos_x % self.width
 	y := pos_y % self.height
 	mut result := self.get_pixel(x, y)
-	self.data[x / 8 + self.width * y / 8] ^= 1 << (x % 8)
+	self.data[x / 8 + self.width / 8 * y] ^= 1 << (7 - x % 8)
 	return result
 }
 
 fn (mut self PPU) get_pixel(x int, y int) bool {
-	return ((self.data[x / 8 + self.width * y / 8] >> (x % 8)) & 1) != 0
+	return ((self.data[x / 8 + self.width / 8 * y] >> (7 - x % 8)) & 1) != 0
 }
 
 [direct_array_access]
@@ -62,6 +62,7 @@ pub fn (mut self PPU) clear() {
 	for index in 0 .. self.width * self.height / 8 {
 		self.data[index] = 0
 	}
+	self.draw_flag = true
 }
 
 pub fn (mut self PPU) resize(width int, height int) {

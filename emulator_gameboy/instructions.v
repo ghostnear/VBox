@@ -157,7 +157,7 @@ fn instruction_ld_16imm(mut self CPU, arg1 voidptr, arg2 voidptr) {
 }
 
 fn instruction_conditional_jump(mut self CPU, arg1 voidptr, arg2 voidptr) {
-	if check_flag(mut self, CPU_CONDITIONS(arg1)) == false {
+	if check_flag(mut self, arg1) == false {
 		return
 	}
 	self.pc = u16(arg1)
@@ -178,7 +178,7 @@ fn instruction_ld_8(mut self CPU, arg1 voidptr, arg2 voidptr) {
 }
 
 fn instruction_conditional_call(mut self CPU, arg1 voidptr, arg2 voidptr) {
-	if check_flag(mut self, CPU_CONDITIONS(arg1)) == false {
+	if check_flag(mut self, arg1) == false {
 		return
 	}
 	self.sp -= 2
@@ -230,8 +230,8 @@ fn instruction_dec_16(mut self CPU, arg1 voidptr, arg2 voidptr) {
 	(*addr)--
 }
 
-fn check_flag(mut self CPU, flag CPU_CONDITIONS) bool {
-	match flag {
+fn check_flag(mut self CPU, flag voidptr) bool {
+	match CPU_CONDITIONS(flag) {
 		.carry {
 			if get_cpu_flag(mut self, CPU_FLAGS.c) == 0 {
 				return false
@@ -277,7 +277,7 @@ fn instruction_relative_jump(mut self CPU, arg1 voidptr, arg2 voidptr) {
 }
 
 fn instruction_conditional_relative_jump(mut self CPU, arg1 voidptr, arg2 voidptr) {
-	if check_flag(mut self, CPU_CONDITIONS(arg1)) == false {
+	if check_flag(mut self, arg1) == false {
 		return
 	}
 	self.pc += u16(i16(i8(arg2)))
