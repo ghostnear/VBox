@@ -1,5 +1,7 @@
 module emulator_chip8
 
+import time
+
 struct CPU {
 mut:
 	// Other components
@@ -35,7 +37,9 @@ pub fn (mut self CPU) update(delta f64) {
 			self.step()
 			self.timer -= 1.0 / self.instruction_rate
 		}
+		time.sleep(1000000.0 / self.instruction_rate - self.timer)
 	} else {
+		self.timer = 0
 		if self.key_register != 0xFF {
 			if self.key_to_wait_for == 0xFF {
 				self.key_to_wait_for = self.input.get_first_key_pressed()

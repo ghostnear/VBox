@@ -9,7 +9,7 @@
 
 ## Issues:
 
-- Has a weird display bug in the Tetris ROM.
+- Nothing so far.
 
 ## Passed tests:
 
@@ -19,5 +19,5 @@
     - [x] Corax+
     - [x] Flags
     - [ ] Quirks
-        - no waiting for 60Hz VBlank.
+        - no waiting for 60Hz VBlank (unimplemented).
     - [x] Keypad

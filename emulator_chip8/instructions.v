@@ -170,7 +170,7 @@ pub fn (mut self CPU) populate_instruction_tables() {
 
 	// CXNN - LD VX, RND NN
 	self.instruction_table[0xC] = fn (mut self CPU, opcode u16) {
-		self.v[(opcode & 0xF00) >> 8] = rand.u8()
+		self.v[(opcode & 0xF00) >> 8] = rand.u8() & u8(opcode & 0xFF)
 	}
 
 	// DXYN - DRW VX, VY, N
