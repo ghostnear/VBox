@@ -1,5 +1,5 @@
 {
     "emu_type": "chip8",
-    "rom_path": "./roms/c8/games/Tetris [Fran Dachille, 1991].ch8",
+    "rom_path": "./roms/c8/games/pong2.ch8",
     "instruction_rate": 1000.0
 }

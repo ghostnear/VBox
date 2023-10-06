@@ -7,9 +7,11 @@
 - [Awesome CHIP8](https://chip-8.github.io/links/)
 - [Timendus' CHIP8 test suite](https://github.com/Timendus/chip8-test-suite)
 
-## Passed tests:
+## Issues:
 
 - Has a weird display bug in the Tetris ROM.
+
+## Passed tests:
 
 - [ ] Timendus' CHIP8 test suite
     - [x] CHIP8 logo.

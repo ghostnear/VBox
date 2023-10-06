@@ -1,5 +1,6 @@
 module emulator_chip8
 
+import log
 import rand
 
 fn unknown_opcode(mut self CPU, opcode u16) {
@@ -31,7 +32,7 @@ pub fn (mut self CPU) populate_instruction_tables() {
 	// 1NNN - JP NNN
 	self.instruction_table[0x1] = fn (mut self CPU, opcode u16) {
 		if self.pc - 2 == opcode & 0xFFF {
-			println('WARN: Infinite jump detected! Stopping...')
+			log.warn('Infinite jump detected! Stopping emulation.')
 			self.halt_flag = true
 		}
 		self.pc = opcode & 0xFFF
@@ -169,12 +170,12 @@ pub fn (mut self CPU) populate_instruction_tables() {
 
 	// CXNN - LD VX, RND NN
 	self.instruction_table[0xC] = fn (mut self CPU, opcode u16) {
-		self.v[(opcode & 0xF00) >> 8] = 1
+		self.v[(opcode & 0xF00) >> 8] = rand.u8()
 	}
 
 	// DXYN - DRW VX, VY, N
 	self.instruction_table[0xD] = fn (mut self CPU, opcode u16) {
-		if self.vsync_timer.get_value() != 0 {
+		if self.vsync_timer.get_value() > 0 {
 			self.pc -= 2
 			return
 		}
@@ -243,8 +244,6 @@ pub fn (mut self CPU) populate_instruction_tables() {
 			}
 			// ADD I, VX
 			0x1E {
-				println(self.v[3])
-				println('${self.v[(opcode & 0xF00) >> 8]:02X}')
 				self.i += self.v[(opcode & 0xF00) >> 8]
 			}
 			// LD I, hex(VX)
