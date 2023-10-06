@@ -175,13 +175,6 @@ pub fn (mut self CPU) populate_instruction_tables() {
 
 	// DXYN - DRW VX, VY, N
 	self.instruction_table[0xD] = fn (mut self CPU, opcode u16) {
-		if self.vsync_timer.get_value() > 0 {
-			self.pc -= 2
-			return
-		}
-
-		self.vsync_timer.set_value(1)
-
 		self.v[0xF] = 0x00
 
 		x_pos := self.v[(opcode & 0xF00) >> 8] % self.ppu.width

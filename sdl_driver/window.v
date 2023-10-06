@@ -20,7 +20,7 @@ pub fn create_window(config WindowConfig) &Window {
 
 	mut result := &Window{
 		internal: sdl.create_window(config.title.str, sdl.windowpos_centered, sdl.windowpos_centered,
-			int(config.width), int(config.height), 0)
+			int(config.width), int(config.height), u32(sdl.WindowFlags.resizable) | u32(sdl.WindowFlags.opengl))
 		renderer: 0
 	}
 	if result.internal == sdl.null {

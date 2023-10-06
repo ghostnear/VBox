@@ -25,19 +25,16 @@ mut:
 	// Internal timers
 	timer            f64
 	instruction_rate f64 = 500.0
-	vsync_timer      Timer
 }
 
 pub fn (mut self CPU) update(delta f64) {
-	self.vsync_timer.update(delta)
-
 	if !self.halt_flag {
 		self.timer += delta
 		for self.timer > 1.0 / self.instruction_rate && !self.halt_flag {
 			self.step()
 			self.timer -= 1.0 / self.instruction_rate
 		}
-		time.sleep(1000000.0 / self.instruction_rate - self.timer)
+		time.sleep(1000000000.0 / self.instruction_rate - self.timer)
 	} else {
 		self.timer = 0
 		if self.key_register != 0xFF {

@@ -19,5 +19,5 @@
     - [x] Corax+
     - [x] Flags
     - [ ] Quirks
-        - no waiting for 60Hz VBlank (unimplemented).
+        - no waiting for 60Hz VBlank in normal CHIP8 mode (unimplemented, probably won't be).
     - [x] Keypad
