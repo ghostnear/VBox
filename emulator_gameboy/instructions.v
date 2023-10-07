@@ -179,10 +179,10 @@ fn instruction_ld_16imm(mut self CPU, arg1 voidptr, arg2 voidptr) {
 }
 
 fn instruction_conditional_jump(mut self CPU, arg1 voidptr, arg2 voidptr) {
-	if check_flag(mut self, arg1) == false {
+	if !check_flag(mut self, arg1) {
 		return
 	}
-	self.pc = u16(arg1)
+	self.pc = u16(arg2)
 }
 
 fn instruction_direct_jump(mut self CPU, arg1 voidptr, arg2 voidptr) {
@@ -200,7 +200,7 @@ fn instruction_ld_8(mut self CPU, arg1 voidptr, arg2 voidptr) {
 }
 
 fn instruction_conditional_call(mut self CPU, arg1 voidptr, arg2 voidptr) {
-	if check_flag(mut self, arg1) == false {
+	if !check_flag(mut self, arg1) {
 		return
 	}
 	self.sp -= 2
