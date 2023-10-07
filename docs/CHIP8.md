@@ -20,4 +20,5 @@
     - [x] Flags
     - [ ] Quirks
         - no waiting for 60Hz VBlank in normal CHIP8 mode (unimplemented, probably won't be).
+            - this also creates speed issues for CHIP8 when the emulator speed is set too high, setting it lower fixes it.
     - [x] Keypad

@@ -1,6 +1,7 @@
 module emulator_gameboy
 
 import os
+import log
 import sdl
 import sdl_driver
 import emulator_gameboy.mappers
@@ -62,7 +63,7 @@ pub fn (mut self Emulator) on_event(event &sdl.Event) {
 
 fn (mut self Emulator) load_rom(path string) {
 	// Open file.
-	mut file := os.open(path) or { panic("Couldn't open Gameboy ROM file. (${err})") }
+	mut file := os.open(path) or { log.error("An error has occured. (${err})") exit(-1) }
 
 	// Get ROM type and load.
 	rom_type := file.read_bytes_at(1, 0x147)[0]
@@ -74,7 +75,8 @@ fn (mut self Emulator) load_rom(path string) {
 			self.ram.cartridge = &mappers.MapperMBC1{}
 		}
 		else {
-			panic('Unimplemented mapper with id ${rom_type:02X}')
+			log.error('Unimplemented mapper with id ${rom_type:02X}')
+			exit(-1)
 		}
 	}
 	self.ram.cartridge.load_rom_bytes(file.read_bytes(utils.get_file_size(mut file)))
@@ -82,7 +84,7 @@ fn (mut self Emulator) load_rom(path string) {
 	// TODO: print ROM data.
 	// println('INFO: ROM Data:\n${self.ram.cartridge.rom_data.jsonify()}')
 
-	println('INFO: Gameboy ROM loaded successfully.')
+	log.info('Gameboy ROM loaded successfully.')
 }
 
 fn (mut self Emulator) load_bios(path string) {
@@ -107,8 +109,10 @@ pub fn (mut self Emulator) draw() {
 }
 
 pub fn (mut self Emulator) update() {
-	self.cpu.step()
-	self.ppu.update()
+	for _ in 0..10000 {
+		self.cpu.step()
+		self.ppu.update()
+	}
 }
 
 pub fn (mut self Emulator) is_running() bool {

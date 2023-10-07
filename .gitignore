@@ -4,7 +4,8 @@ roms/
 # Ignore built files
 *.dll
 *.exe
-Vbox*
+VBox*
+VBox
 
 # Ignore user files
 *.bat

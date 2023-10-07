@@ -1,5 +1,6 @@
 module emulator_gameboy
 
+import log
 import utils
 
 // CPU flag positions as bits in the flag register.
@@ -34,20 +35,20 @@ fn get_cpu_flag(mut self CPU, flag CPU_FLAGS) int {
 /// Unknown CPU opcodes.
 fn unknown_cb_opcode(mut self CPU, arg1 voidptr, arg2 voidptr) {
 	opcode := self.ram.read_byte(self.pc - 1)
-	println('ERROR: Unknown CB opcode ${opcode:02X} detected at PC ${self.pc - 2:04X}!')
+	log.error('Unknown CB opcode ${opcode:02X} detected at PC ${self.pc - 2:04X}!')
 
 	x := opcode >> 6
 	y := (opcode >> 3) & 0b111
 	z := opcode & 0b111
 
-	println('WARN: Debug data (x: ${x}, y: ${y}, z: ${z})')
+	log.warn('Debug data (x: ${x}, y: ${y}, z: ${z})')
 
 	exit(-1)
 }
 
 fn unknown_opcode(mut self CPU, arg1 voidptr, arg2 voidptr) {
 	opcode := self.ram.read_byte(self.pc - 1)
-	println('ERROR: Unknown opcode ${opcode:02X} detected at PC ${self.pc - 1:04X}!')
+	log.error('Unknown opcode ${opcode:02X} detected at PC ${self.pc - 1:04X}!')
 
 	x := opcode >> 6
 	y := (opcode >> 3) & 0b111
@@ -55,7 +56,7 @@ fn unknown_opcode(mut self CPU, arg1 voidptr, arg2 voidptr) {
 	p := y >> 1
 	q := y & 0b1
 
-	println('WARN: Debug data (x: ${x}, y: ${y}, z: ${z}, p: ${p}, q: ${q})')
+	log.warn('Debug data (x: ${x}, y: ${y}, z: ${z}, p: ${p}, q: ${q})')
 
 	exit(-1)
 }
@@ -124,6 +125,27 @@ fn instruction_xor_with_a(mut self CPU, arg1 voidptr, arg2 voidptr) {
 		set_cpu_flag(mut self, CPU_FLAGS.c, 0)
 		set_cpu_flag(mut self, CPU_FLAGS.h, 0)
 	}
+}
+
+fn instruction_daa(mut self CPU, arg1 voidptr, arg2 voidptr) {
+	// https://forums.nesdev.org/viewtopic.php?t=15944 (thanks.)
+	// note: assumes a is a uint8_t and wraps from 0xff to 0
+	if get_cpu_flag(mut self, CPU_FLAGS.n) == 0 {  // after an addition, adjust if (half-)carry occurred or if result is out of bounds
+		if get_cpu_flag(mut self, CPU_FLAGS.c) != 0 || self.reg.a > 0x99 {
+			self.reg.a += 0x60;
+			set_cpu_flag(mut self, CPU_FLAGS.c, 1)
+		}
+		if get_cpu_flag(mut self, CPU_FLAGS.h) != 0 || (self.reg.a & 0x0f) > 0x09 {
+			self.reg.a += 0x6;
+		}
+	}
+	else {  // after a subtraction, only adjust if (half-)carry occurred
+		if get_cpu_flag(mut self, CPU_FLAGS.c) != 0 { self.reg.a -= 0x60; }
+		if get_cpu_flag(mut self, CPU_FLAGS.h) != 0 { self.reg.a -= 0x6; }
+	}
+	// these flags are always updated
+	set_cpu_flag(mut self, CPU_FLAGS.z, int(self.reg.a == 0)) // the usual z flag
+	set_cpu_flag(mut self, CPU_FLAGS.h, 0) // h flag is always cleared
 }
 
 fn instruction_or_with_a(mut self CPU, arg1 voidptr, arg2 voidptr) {
@@ -271,7 +293,7 @@ fn instruction_relative_jump(mut self CPU, arg1 voidptr, arg2 voidptr) {
 	old_pc := self.pc - 1
 	self.pc += 1 + u16(i16(i8(arg1)))
 	if old_pc == self.pc {
-		println('WARN: Infinite jump detected. Stopping!')
+		log.warn('Infinite jump detected. Stopping!')
 		exit(-1)
 	}
 }

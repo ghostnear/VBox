@@ -13,21 +13,18 @@
 - Blargg’s test ROMs
     - cpu_instrs
         - individual
-            - [ ] 01-special.gb
-                - Mismatch in CPU state at line 148318 (previous opcode: 0xF1 POP AF)
+            - [x] 01-special.gb
             - [ ] 02-interrupts.gb
-                - unimplemented interrupts
+                - Unimplemented interrupts.
             - [ ] 03-op sp,hl.gb
-                - unimplemented opcode
+                - Unknown opcode E8 detected at PC DEF8! Debug data (x: 3, y: 5, z: 0, p: 2, q: 1)
             - [x] 04-op r,imm.gb
             - [x] 05-op rp.gb
             - [x] 06-ld r,r.gb
             - [ ] 07-jr,jp,call,ret,rst.gb
-                - Mismatch in CPU state at line 205978 (previous opcode: 0xF1 POP AF)
-                - unimplemented opcode
-            - [ ] 08-misc instrs.gb
-                - Mismatch in CPU state at line 208109 (previous opcode: 0xF1 POP AF)
+                - Mismatch in CPU state at line 205978 (previous opcode: 0xC2 JP NZ a16)
+                - Unknown opcode D9 detected at PC DEF8! Debug data (x: 3, y: 3, z: 1, p: 1, q: 1)
+            - [x] 08-misc instrs.gb
             - [x] 09-op r,r.gb
             - [x] 10-bit ops.gb
-            - [ ] 11-op a,(hl).gb
-                - unimplemented opcode
+            - [x] 11-op a,(hl).gb

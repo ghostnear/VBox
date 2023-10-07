@@ -1,5 +1,7 @@
 module mappers
 
+import log
+
 pub struct MapperMBC1 {
 	name string = 'MBC1'
 mut:
@@ -12,7 +14,8 @@ mut:
 pub fn (mut self MapperMBC1) load_rom_bytes(data []u8) {
 	// 2 Megabyte max filesize
 	if data.len > 0x200000 {
-		panic('ERROR: Gameboy ROM file is too big!')
+		log.error('Gameboy ROM file is too big! Got ${data.len}, expected max 2MB.')
+		exit(-1)
 	}
 
 	unsafe {

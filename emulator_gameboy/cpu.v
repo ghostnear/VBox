@@ -114,6 +114,7 @@ fn (mut self CPU) set_post_boot_state() {
 fn (mut self CPU) update_hl_reg() {
 	unsafe {
 		self.reg_table[6] = self.ram.get_pointer(&u16(&self.reg.l))
+		self.reg.f &= 0xF0
 	}
 }
 
@@ -346,6 +347,11 @@ fn (mut self CPU) decode_opcode(opcode u16) Instruction {
 						3 {
 							return Instruction{
 								func: instruction_rotate_right_a
+							}
+						}
+						4 {
+							return Instruction{
+								func: instruction_daa
 							}
 						}
 						5 {
@@ -618,13 +624,13 @@ fn (mut self CPU) decode_cb_opcode(opcode u16) Instruction {
 }
 
 pub fn (mut self CPU) step() {
+	// Update tables.
+	self.update_hl_reg()
+
 	// Log status before execution if the parameters are set.
 	if self.debug.is_opened {
 		self.log_current_status()
 	}
-
-	// Update tables.
-	self.update_hl_reg()
 
 	// Fetch opcode.
 	mut opcode := self.ram.read_byte(self.pc)

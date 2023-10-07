@@ -1,5 +1,7 @@
 module mappers
 
+import log
+
 pub struct MapperNone {
 	name string = 'None'
 mut:
@@ -8,7 +10,8 @@ mut:
 
 pub fn (mut self MapperNone) load_rom_bytes(data []u8) {
 	if data.len > 0x8000 {
-		panic('ERROR: Gameboy ROM file is too big!')
+		log.error('Gameboy ROM file is too big! Got ${data.len}, expected max 32KB.')
+		exit(-1)
 	}
 	// TODO: surely V has a better way of copying than this...
 	for index in 0 .. data.len {
