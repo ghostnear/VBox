@@ -208,6 +208,26 @@ fn instruction_conditional_call(mut self CPU, arg1 voidptr, arg2 voidptr) {
 	self.pc = u16(arg2)
 }
 
+fn instruction_add_i8_to_i16(mut self CPU, arg1 voidptr, arg2 voidptr) {
+	unsafe {
+		// Highly illegal
+		set_cpu_flag(mut self, CPU_FLAGS.c, int((((*(&i16(arg1)) & 0xFF) + (*(&i8(arg2)) & 0xFF)) & 0x100) == 0x100))
+		set_cpu_flag(mut self, CPU_FLAGS.h, int((((*(&i16(arg1)) & 0xF) + (*(&i8(arg2)) & 0xF)) & 0x10) == 0x10))
+		*(&i16(arg1)) += *(&i8(arg2))
+		set_cpu_flag(mut self, CPU_FLAGS.n, 0)
+		set_cpu_flag(mut self, CPU_FLAGS.z, 0)
+	}
+}
+
+fn instruction_add_8(mut self CPU, arg1 voidptr, arg2 voidptr) {
+	unsafe {
+		set_cpu_flag(mut self, CPU_FLAGS.c, int(0xFF - *(&u8(arg1)) < *(&u8(arg2))))
+		set_cpu_flag(mut self, CPU_FLAGS.h, int((((*(&u8(arg1)) & 0xF) + (*(&u8(arg2)) & 0xF)) & 0x10) == 0x10))
+		*(&u8(arg1)) += *(&u8(arg2))
+		set_cpu_flag(mut self, CPU_FLAGS.n, 0)
+	}
+}
+
 fn instruction_add_16(mut self CPU, arg1 voidptr, arg2 voidptr) {
 	unsafe {
 		set_cpu_flag(mut self, CPU_FLAGS.c, int(0xFFFF - *(&u16(arg1)) < *(&u16(arg2))))

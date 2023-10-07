@@ -16,8 +16,7 @@
             - [x] 01-special.gb
             - [ ] 02-interrupts.gb
                 - Unimplemented interrupts.
-            - [ ] 03-op sp,hl.gb
-                - Unknown opcode E8 detected at PC DEF8! Debug data (x: 3, y: 5, z: 0, p: 2, q: 1)
+            - [x] 03-op sp,hl.gb
             - [x] 04-op r,imm.gb
             - [x] 05-op rp.gb
             - [x] 06-ld r,r.gb

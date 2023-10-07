@@ -1,6 +1,7 @@
 module emulator_gameboy
 
 import os
+import log
 
 // CPU instruction have been configured into a function pointer to our routines and 2 arguments. Lets hope none of them are longer.
 struct Instruction {
@@ -378,7 +379,7 @@ fn (mut self CPU) decode_opcode(opcode u16) Instruction {
 		}
 		1 {
 			if z == 6 && y == 6 {
-				println('WARN: Unimplemented HALT instruction.')
+				log.warn('Unimplemented HALT instruction.')
 				return Instruction{
 					func: instruction_nop
 				}
@@ -414,6 +415,15 @@ fn (mut self CPU) decode_opcode(opcode u16) Instruction {
 								arg2: &self.reg.a
 							}
 						}
+						5 {
+							data := i8(self.ram.read_byte(self.pc))
+							self.pc += 1
+							return Instruction {
+								func: instruction_add_i8_to_i16,
+								arg1: &self.sp,
+								arg2: &data
+							}
+						}
 						6 {
 							data := self.ram.read_byte(self.pc)
 							self.pc += 1
@@ -421,6 +431,21 @@ fn (mut self CPU) decode_opcode(opcode u16) Instruction {
 								func: instruction_ld_8
 								arg1: &self.reg.a
 								arg2: self.ram.get_pointer(u16(0xFF00) + data)
+							}
+						}
+						7 {
+							data := i8(self.ram.read_byte(self.pc))
+							self.pc += 1
+							
+							old_sp := self.sp
+							instruction_add_i8_to_i16(mut self, &self.sp, &data)
+							self.sp = old_sp
+
+							add_result := (i16(self.sp) + data)
+							return Instruction{
+								func: instruction_ld_16
+								arg1: self.rp_table[2]
+								arg2: &add_result
 							}
 						}
 						else {}
