@@ -2,12 +2,12 @@ module utils
 
 // This file contains bitwise operations.
 
-[inline]
+@[inline]
 pub fn get_bit(number int, count int) int {
 	return (number >> count) & 0b1
 }
 
-[inline]
+@[inline]
 pub fn set_bit(number &int, count int, value int) {
 	unsafe {
 		if value != 0 {

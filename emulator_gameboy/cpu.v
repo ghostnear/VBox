@@ -13,7 +13,7 @@ struct Instruction {
 // WARN: THIS ORDER ASSUMES THAT WE ARE USING LITTLE ENDIANESS
 
 // Registers are marked as packed because, using funny pointers, we can get the 16 bit registers much easier this way.
-[packed]
+@[packed]
 struct Registers {
 mut:
 	f u8
@@ -26,7 +26,7 @@ mut:
 	h u8
 }
 
-[heap]
+@[heap]
 struct CPU {
 mut:
 	// Refference to the RAM so we can use it.
@@ -111,7 +111,7 @@ fn (mut self CPU) set_post_boot_state() {
 	self.pc = 0x100
 }
 
-[inline]
+@[inline]
 fn (mut self CPU) update_hl_reg() {
 	unsafe {
 		self.reg_table[6] = self.ram.get_pointer(&u16(&self.reg.l))
@@ -418,9 +418,9 @@ fn (mut self CPU) decode_opcode(opcode u16) Instruction {
 						5 {
 							data := i8(self.ram.read_byte(self.pc))
 							self.pc += 1
-							return Instruction {
-								func: instruction_add_i8_to_i16,
-								arg1: &self.sp,
+							return Instruction{
+								func: instruction_add_i8_to_i16
+								arg1: &self.sp
 								arg2: &data
 							}
 						}
@@ -436,7 +436,7 @@ fn (mut self CPU) decode_opcode(opcode u16) Instruction {
 						7 {
 							data := i8(self.ram.read_byte(self.pc))
 							self.pc += 1
-							
+
 							old_sp := self.sp
 							instruction_add_i8_to_i16(mut self, &self.sp, &data)
 							self.sp = old_sp

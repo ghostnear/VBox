@@ -7,7 +7,7 @@ import sdl_driver
 import emulator_gameboy.mappers
 import utils
 
-[heap]
+@[heap]
 pub struct Emulator {
 mut:
 	// Externals
@@ -37,7 +37,7 @@ pub fn create_emulator(config Config) &Emulator {
 		ram: &ram_component
 		cpu: &cpu_component
 		ppu: &ppu_component
-		window: 0
+		window: unsafe { 0 }
 	}
 
 	// Pre-boot stuff.
@@ -63,7 +63,10 @@ pub fn (mut self Emulator) on_event(event &sdl.Event) {
 
 fn (mut self Emulator) load_rom(path string) {
 	// Open file.
-	mut file := os.open(path) or { log.error("An error has occured. (${err})") exit(-1) }
+	mut file := os.open(path) or {
+		log.error('An error has occured. (${err})')
+		exit(-1)
+	}
 
 	// Get ROM type and load.
 	rom_type := file.read_bytes_at(1, 0x147)[0]
@@ -109,7 +112,7 @@ pub fn (mut self Emulator) draw() {
 }
 
 pub fn (mut self Emulator) update() {
-	for _ in 0..10000 {
+	for _ in 0 .. 10000 {
 		self.cpu.step()
 		self.ppu.update()
 	}

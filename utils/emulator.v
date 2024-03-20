@@ -5,7 +5,7 @@ import sdl_driver
 
 // This file contains the emulator interface.
 
-interface Emulator {
+pub interface Emulator {
 mut:
 	window &sdl_driver.Window
 	set_window(&sdl_driver.Window)

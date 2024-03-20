@@ -14,7 +14,7 @@ enum CPU_FLAGS {
 // These are all the possible CPU jumping conditions.
 // Total has a double role: counting how many of them they are and being the "last condition" which is basically none in this code.
 enum CPU_CONDITIONS {
-	non_zero = 0
+	non_zero  = 0
 	zero
 	non_carry
 	carry
@@ -22,12 +22,12 @@ enum CPU_CONDITIONS {
 }
 
 /// Functions for working with the CPU flags.
-[inline]
+@[inline]
 fn set_cpu_flag(mut self CPU, flag CPU_FLAGS, value int) {
 	utils.set_bit(&self.reg.f, int(flag), value)
 }
 
-[inline]
+@[inline]
 fn get_cpu_flag(mut self CPU, flag CPU_FLAGS) int {
 	return utils.get_bit(self.reg.f, int(flag))
 }
@@ -130,18 +130,21 @@ fn instruction_xor_with_a(mut self CPU, arg1 voidptr, arg2 voidptr) {
 fn instruction_daa(mut self CPU, arg1 voidptr, arg2 voidptr) {
 	// https://forums.nesdev.org/viewtopic.php?t=15944 (thanks.)
 	// note: assumes a is a uint8_t and wraps from 0xff to 0
-	if get_cpu_flag(mut self, CPU_FLAGS.n) == 0 {  // after an addition, adjust if (half-)carry occurred or if result is out of bounds
+	if get_cpu_flag(mut self, CPU_FLAGS.n) == 0 { // after an addition, adjust if (half-)carry occurred or if result is out of bounds
 		if get_cpu_flag(mut self, CPU_FLAGS.c) != 0 || self.reg.a > 0x99 {
-			self.reg.a += 0x60;
+			self.reg.a += 0x60
 			set_cpu_flag(mut self, CPU_FLAGS.c, 1)
 		}
 		if get_cpu_flag(mut self, CPU_FLAGS.h) != 0 || (self.reg.a & 0x0f) > 0x09 {
-			self.reg.a += 0x6;
+			self.reg.a += 0x6
 		}
-	}
-	else {  // after a subtraction, only adjust if (half-)carry occurred
-		if get_cpu_flag(mut self, CPU_FLAGS.c) != 0 { self.reg.a -= 0x60; }
-		if get_cpu_flag(mut self, CPU_FLAGS.h) != 0 { self.reg.a -= 0x6; }
+	} else { // after a subtraction, only adjust if (half-)carry occurred
+		if get_cpu_flag(mut self, CPU_FLAGS.c) != 0 {
+			self.reg.a -= 0x60
+		}
+		if get_cpu_flag(mut self, CPU_FLAGS.h) != 0 {
+			self.reg.a -= 0x6
+		}
 	}
 	// these flags are always updated
 	set_cpu_flag(mut self, CPU_FLAGS.z, int(self.reg.a == 0)) // the usual z flag
@@ -505,7 +508,9 @@ fn instruction_cb_swap(mut self CPU, arg1 voidptr, arg2 voidptr) {
 	mut result := u8(0)
 	result |= (*&u8(arg1) & 0xF) << 4
 	result |= (*&u8(arg1) & 0xF0) >> 4
-	(*&u8(arg1)) = result
+	unsafe {
+		(*&u8(arg1)) = result
+	}
 	set_cpu_flag(mut self, CPU_FLAGS.c, 0)
 	set_cpu_flag(mut self, CPU_FLAGS.n, 0)
 	set_cpu_flag(mut self, CPU_FLAGS.h, 0)

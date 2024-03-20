@@ -7,21 +7,21 @@ pub struct MapperDummy {
 pub fn (mut self MapperDummy) load_rom_bytes(data []u8) {
 }
 
-[inline]
+@[inline]
 pub fn (mut self MapperDummy) read_byte(addr u16) u8 {
 	return 0
 }
 
-[inline]
+@[inline]
 pub fn (mut self MapperDummy) write_byte(addr u16, value u8) {
 }
 
-[inline]
+@[inline]
 pub fn (mut self MapperDummy) read_word(addr u16) u16 {
 	return 0
 }
 
-[inline]
+@[inline]
 pub fn (mut self MapperDummy) write_word(addr u16, value u16) {
 }
 

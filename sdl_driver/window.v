@@ -3,11 +3,11 @@ module sdl_driver
 import sdl
 import log
 
-[heap]
+@[heap]
 pub struct Window {
 mut:
 	closed     bool
-	internal   &sdl.Window = sdl.null
+	internal   &sdl.Window   = sdl.null
 	renderer   &sdl.Renderer = sdl.null
 	now        u64
 	last       u64
@@ -16,23 +16,23 @@ mut:
 
 pub fn create_window(config WindowConfig) &Window {
 	sdl.init(sdl.init_everything)
-	log.info("SDL initialized.")
+	log.info('SDL initialized.')
 
 	mut result := &Window{
 		internal: sdl.create_window(config.title.str, sdl.windowpos_centered, sdl.windowpos_centered,
 			int(config.width), int(config.height), u32(sdl.WindowFlags.resizable) | u32(sdl.WindowFlags.opengl))
-		renderer: 0
+		renderer: unsafe { 0 }
 	}
 	if result.internal == sdl.null {
-		panic("Could not create SDL Window: (${sdl.get_error()})")
+		panic('Could not create SDL Window: (${sdl.get_error()})')
 	}
-	log.debug("SDL Window created.")
+	log.debug('SDL Window created.')
 
 	result.renderer = sdl.create_renderer(result.internal, -1, u32(sdl.RendererFlags.accelerated) | u32(sdl.RendererFlags.presentvsync))
 	if result.renderer == sdl.null {
-		panic("Could not create SDL Renderer (${sdl.get_error()})")
+		panic('Could not create SDL Renderer (${sdl.get_error()})')
 	}
-	log.debug("SDL Renderer created.")
+	log.debug('SDL Renderer created.')
 
 	result.now = sdl.get_performance_counter()
 	result.last = sdl.get_performance_counter()
@@ -67,10 +67,10 @@ pub fn (mut self Window) end_drawing() {
 }
 
 pub fn (mut self Window) close() {
-	log.debug("Closing SDL Window.")
+	log.debug('Closing SDL Window.')
 
 	self.closed = true
 
-	log.debug("Quitting SDL.")
+	log.debug('Quitting SDL.')
 	sdl.quit()
 }

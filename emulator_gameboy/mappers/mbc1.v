@@ -28,7 +28,7 @@ pub fn (mut self MapperMBC1) load_rom_bytes(data []u8) {
 	}
 }
 
-[inline]
+@[inline]
 pub fn (mut self MapperMBC1) read_byte(addr u16) u8 {
 	// First bank, forced.
 	if addr <= 0x3FFF {
@@ -44,7 +44,7 @@ pub fn (mut self MapperMBC1) read_byte(addr u16) u8 {
 	return 0x00
 }
 
-[inline]
+@[inline]
 pub fn (mut self MapperMBC1) write_byte(addr u16, value u8) {
 	// ROM bank number
 	if addr >= 0x2000 && addr <= 0x3FFF {
@@ -52,12 +52,12 @@ pub fn (mut self MapperMBC1) write_byte(addr u16, value u8) {
 	}
 }
 
-[inline]
+@[inline]
 pub fn (mut self MapperMBC1) read_word(addr u16) u16 {
 	return u16(self.read_byte(addr)) << 8 | self.read_byte(addr + 1)
 }
 
-[inline]
+@[inline]
 pub fn (mut self MapperMBC1) write_word(addr u16, value u16) {
 	self.write_byte(addr, u8(value >> 8))
 	self.write_byte(addr + 1, u8(value & 0xFF))

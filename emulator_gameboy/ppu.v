@@ -1,6 +1,6 @@
 module emulator_gameboy
 
-[heap]
+@[heap]
 struct PPU {
 mut:
 	vram [0x2000]u8

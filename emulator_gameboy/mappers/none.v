@@ -19,22 +19,22 @@ pub fn (mut self MapperNone) load_rom_bytes(data []u8) {
 	}
 }
 
-[inline]
+@[inline]
 pub fn (mut self MapperNone) read_byte(addr u16) u8 {
 	return self.data[addr]
 }
 
-[inline]
+@[inline]
 pub fn (mut self MapperNone) write_byte(addr u16, value u8) {
 	// Do not write anything.
 }
 
-[inline]
+@[inline]
 pub fn (mut self MapperNone) read_word(addr u16) u16 {
 	return u16(self.read_byte(addr)) << 8 | self.read_byte(addr + 1)
 }
 
-[inline]
+@[inline]
 pub fn (mut self MapperNone) write_word(addr u16, value u16) {
 	self.write_byte(addr, u8(value >> 8))
 	self.write_byte(addr + 1, u8(value & 0xFF))

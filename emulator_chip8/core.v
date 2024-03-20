@@ -5,7 +5,7 @@ import utils
 import sdl
 import sdl_driver
 
-[heap]
+@[heap]
 pub struct Emulator {
 mut:
 	window &sdl_driver.Window
@@ -21,7 +21,7 @@ mut:
 pub fn create_emulator(config Config) &Emulator {
 	// Create components
 	mut ppu := &PPU{
-		window: 0
+		window: unsafe { 0 }
 	}
 	ppu.resize(64, 32)
 
@@ -33,7 +33,7 @@ pub fn create_emulator(config Config) &Emulator {
 
 	// Add to the emulator.
 	mut result := &Emulator{
-		window: 0
+		window: unsafe { 0 }
 		cpu: cpu
 		ppu: ppu
 	}
@@ -53,7 +53,7 @@ fn (mut self Emulator) set_window(window &sdl_driver.Window) {
 	self.ppu.resize(self.ppu.width, self.ppu.height)
 }
 
-[inline]
+@[inline]
 fn (mut self Emulator) load_rom(path string, offset u16) {
 	// Open file.
 	mut file := os.open(path) or { panic("Couldn't open CHIP8 ROM file. (${err})") }

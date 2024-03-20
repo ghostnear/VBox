@@ -2,7 +2,7 @@ module emulator_gameboy
 
 import emulator_gameboy.mappers
 
-[heap]
+@[heap]
 struct RAM {
 mut:
 	cartridge &mappers.Mapper

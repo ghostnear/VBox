@@ -2,14 +2,14 @@ module emulator_dummy
 
 import sdl_driver
 
-[heap]
+@[heap]
 pub struct Emulator {
 mut:
 	window      &sdl_driver.Window
 	shown_error bool
 }
 
-[inline]
+@[inline]
 pub fn create_emulator(config Config) &Emulator {
 	result := &Emulator{
 		window: 0

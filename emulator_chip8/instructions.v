@@ -9,7 +9,7 @@ fn unknown_opcode(mut self CPU, opcode u16) {
 	self.key_register = 0xFF
 }
 
-[inline]
+@[inline]
 pub fn (mut self CPU) populate_instruction_tables() {
 	// System calls
 	self.instruction_table[0x0] = fn (mut self CPU, opcode u16) {
