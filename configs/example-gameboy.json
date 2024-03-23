@@ -1,6 +1,0 @@
-{
-    "emu_type": "gameboy",
-    "rom_path": "./roms/gb/gb-test-roms/cpu_instrs/individual/07-jr,jp,call,ret,rst.gb",
-    "bios_path": "",
-    "debug_log_file": "./gameboy-doctor/vbox.log"
-}

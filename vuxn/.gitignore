@@ -1,6 +1,6 @@
 # Binaries for programs and plugins
 main
-VBox
+vuxn
 *.exe
 *.exe~
 *.so
@@ -22,8 +22,3 @@ bin/
 # vweb and database
 *.db
 *.js
-
-# Development assets.
-tools/
-roms/
-*.log

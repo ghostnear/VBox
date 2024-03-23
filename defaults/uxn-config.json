@@ -1,0 +1,7 @@
+{
+    "preset": "uxn",
+    "data": {
+        "path": "roms/uxn/test/console_test.rom",
+        "devices": "console"
+    }
+}

@@ -1,58 +1,43 @@
 module main
 
-import log
 import os
-import sdl
-import sdl_driver
+import log
+import json
 
 fn main() {
-	// Sanity checks.
-	if os.args.len < 2 {
-		log.error('No config specified in the command line for the emulator.')
-		exit(-1)
+	path := './defaults/uxn-config.json'
+
+	// Custom logger
+	mut logger := log.new_thread_safe_log()
+	os.rm('./last.log') or {}
+	logger.set_full_logpath('./last.log')
+	logger.set_level(log.Level.debug)
+	log.set_logger(logger)
+
+	mut config := json.decode(EmulatorConfig, os.read_file(path) or { '' }) or {
+		// TODO: display error.
+		log.error('Could not parse config JSON: ${err}')
+		return
 	}
-	log.set_level(.debug)
 
-	// Create emulator
-	mut emulator := load_emulator(os.args[1])
-	log.info('Emulator set up.')
+	mut emulator := create_emulator(config) or {
+		// TODO: display error.
+		log.error('Could not create the emulator: ${err}')
+		return
+	}
 
-	// Create window.
-	mut window := sdl_driver.create_window(sdl_driver.WindowConfig{
-		title: 'VBox'
-		width: 960
-		height: 540
-	})
-	emulator.set_window(window)
-	log.info('SDL Window was attached to emulator.')
+	emulator.configure(config.data) or {
+		// TODO: display error.
+		log.error('Could not configure the emulator: ${err}')
+		return
+	}
 
-	// Event polling stuff
-	mut event := sdl.Event{}
-
-	// Main loop.
-	for !window.should_close() {
-		// Update
-		window.update()
-		emulator.update()
-
-		// Draw
-		window.start_drawing()
-		emulator.draw()
-		window.end_drawing()
-
-		// Poll events
-		for 0 < sdl.poll_event(&event) {
-			emulator.on_event(&event)
-			match event.@type {
-				.quit {
-					window.close()
-					log.debug('Window close event sent.')
-				}
-				else {}
-			}
+	for {
+		if !emulator.update(0) {
+			log.info('Emulator quit running.')
+			return
 		}
-	}
 
-	// End.
-	window.close()
+		emulator.draw()
+	}
 }
