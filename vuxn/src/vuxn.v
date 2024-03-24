@@ -31,7 +31,9 @@ pub fn (mut self Emulator) configure(config map[string]string) !bool {
 		}
 		match device {
 			'console' {
-				self.devices.map_device(Console{}, 1)
+				self.devices.map_device(Console{
+					parent: self
+				}, 1)
 			}
 			else {
 				log.error('Unknown device: ${device}')
@@ -41,6 +43,11 @@ pub fn (mut self Emulator) configure(config map[string]string) !bool {
 	}
 
 	return true
+}
+
+fn (mut self Emulator) trigger_vector(address u16) {
+	self.memory.return_stack.push2(self.memory.pc)
+	self.memory.pc = address
 }
 
 fn (mut self Emulator) step() bool {
@@ -66,6 +73,13 @@ fn (mut self Emulator) step() bool {
 		// Special opcodes.
 		0x00 {
 			match opcode {
+				// Break
+				0x00 {
+					if self.memory.return_stack.end == 0 {
+						return false
+					}
+					self.memory.pc = self.memory.return_stack.pop2()
+				}
 				// Jump conditional instant.
 				0x20 {
 					if stack.pop() == 0 {

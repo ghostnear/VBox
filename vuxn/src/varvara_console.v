@@ -5,6 +5,7 @@ import log
 @[heap]
 struct Console {
 mut:
+	parent &Emulator
 	vector []u8 = []u8{len: 2, cap: 2, init: 0x00}
 }
 
@@ -26,6 +27,7 @@ fn (mut self Console) write(address u8, data u8) {
 			self.vector[address] = data
 		}
 		0x08 {
+			self.parent.trigger_vector(u16(self.vector[0]) << 8 | u16(self.vector[1]))
 			if data == 0x0A {
 				print('\n')
 				return
@@ -33,6 +35,7 @@ fn (mut self Console) write(address u8, data u8) {
 			print('${data:c}')
 		}
 		0x09 {
+			self.parent.trigger_vector(u16(self.vector[0]) << 8 | u16(self.vector[1]))
 			if data == 0x0A {
 				eprint('\n')
 				return
