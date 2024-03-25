@@ -38,7 +38,7 @@ fn (mut self Devices) vwrite(condition bool, address u8, data u16) {
 fn (mut self Devices) read(address u8) u8 {
 	if address >> 4 !in self.devices {
 		log.warn('Read call on invalid device 0x${address >> 4:01X} at index: 0x${address & 0xF:01X}.')
-		return 0
+		return 0x00
 	}
 	return self.devices[address >> 4].read(address & 0xF)
 }

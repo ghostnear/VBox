@@ -1,7 +1,7 @@
 {
     "preset": "uxn",
     "data": {
-        "path": "roms/uxn/test/console_write.rom",
-        "devices": "console"
+        "path": "roms/uxn/demos/oneko.rom",
+        "devices": "console,datetime"
     }
 }

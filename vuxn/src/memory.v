@@ -58,7 +58,7 @@ mut:
 
 @[inline]
 fn (mut self Memory) read2(addr u16) u16 {
-	return (u16(self.ram[addr]) << 8 | self.ram[addr + 1])
+	return u16(self.ram[addr]) << 8 | self.ram[addr + 1]
 }
 
 @[inline]

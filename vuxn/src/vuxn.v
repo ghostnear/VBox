@@ -33,7 +33,12 @@ pub fn (mut self Emulator) configure(config map[string]string) !bool {
 			'console' {
 				self.devices.map_device(Console{
 					parent: self
-				}, 1)
+				}, 0x1)
+			}
+			'datetime' {
+				self.devices.map_device(DateTime{
+					parent: self
+				}, 0xC)
 			}
 			else {
 				log.error('Unknown device: ${device}')
@@ -66,7 +71,7 @@ fn (mut self Emulator) step() bool {
 	}
 
 	// Keep mode (do not consume items, i.e do not modify the OG stack on pop)
-	mut keep := (opcode & 0x80) != 0	// The bane of my clean code experience
+	mut keep := (opcode & 0x80) != 0 // The bane of my clean code experience
 	old_end := stack.end
 
 	match opcode & 0x1F {
@@ -365,7 +370,7 @@ fn (mut self Emulator) step() bool {
 			}
 			stack.vpush(wsize, b - a)
 		}
-		// MUL 
+		// MUL
 		0x1A {
 			a := stack.vpop(wsize)
 			b := stack.vpop(wsize)
