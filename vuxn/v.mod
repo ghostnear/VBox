@@ -1,7 +1,7 @@
 Module {
-	name: 'vuxn'
-	description: 'UXN emulation written in V.'
+	name: 'vchip8'
+	description: 'CHIP8 emulation written in V for VBox.'
 	version: '0.1.0'
 	license: 'MIT'
-	dependencies: []
+	dependencies: ['log']
 }

@@ -1,6 +1,7 @@
 module main
 
 import vuxn
+import vchip8
 
 struct EmulatorConfig {
 	preset string
@@ -21,6 +22,9 @@ fn create_emulator(config &EmulatorConfig) !Emulator {
 	match config.preset {
 		'uxn' {
 			return vuxn.Emulator{}
+		}
+		'chip8' {
+			return vchip8.Emulator{}
 		}
 		else {
 			// TODO: throw error.

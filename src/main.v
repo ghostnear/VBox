@@ -3,9 +3,14 @@ module main
 import os
 import log
 import json
+import sdl
+
+fn show_error(title string, message string) {
+	sdl.show_simple_message_box(u32(sdl.MessageBoxFlags.error), title.str, message.str,  unsafe { nil })
+}
 
 fn main() {
-	path := './defaults/uxn-config.json'
+	path := './defaults/chip8-config.json'
 
 	// Custom logger
 	mut logger := log.new_thread_safe_log()
@@ -15,19 +20,19 @@ fn main() {
 	log.set_logger(logger)
 
 	mut config := json.decode(EmulatorConfig, os.read_file(path) or { '' }) or {
-		// TODO: display error.
+		show_error( 'Error', 'Could not parse config JSON:\n${err}')
 		log.error('Could not parse config JSON: ${err}')
 		return
 	}
 
 	mut emulator := create_emulator(config) or {
-		// TODO: display error.
+		show_error( 'Error', 'Could not create the emulator:\n${err}')
 		log.error('Could not create the emulator: ${err}')
 		return
 	}
 
 	emulator.configure(config.data) or {
-		// TODO: display error.
+		show_error( 'Error', 'Could not configure the emulator:\n${err}')
 		log.error('Could not configure the emulator: ${err}')
 		return
 	}

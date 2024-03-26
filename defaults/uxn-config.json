@@ -1,7 +1,7 @@
 {
     "preset": "uxn",
     "data": {
-        "path": "roms/uxn/demos/oneko.rom",
-        "devices": "console,datetime"
+        "path": "roms/uxn/homebrew/hello.rom",
+        "devices": "console"
     }
 }
