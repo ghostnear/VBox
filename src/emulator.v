@@ -27,8 +27,7 @@ fn create_emulator(config &EmulatorConfig) !Emulator {
 			return vchip8.Emulator{}
 		}
 		else {
-			// TODO: throw error.
+			return error('Invalid emulator specified in config: ${config.preset}')
 		}
 	}
-	return error('Invalid emulator specified in config: ${config.preset}')
 }
