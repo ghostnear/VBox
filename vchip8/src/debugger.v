@@ -147,13 +147,13 @@ fn (mut self Emulator) execute_debug_command() bool {
 			}
 
 			// Parsing the address.
-			address := u16(strconv.common_parse_int(commands[2], 16, 16, false, false) or {
+			address := u16(strconv.common_parse_uint(commands[2], 16, 16, false, false) or {
 				println(term.red('Invalid address.'))
 				return true
 			})
 
 			// Printing the address value.
-			println('0x${address:04X}: 0x${self.memory.read(address):02X}')
+			println("${term.blue('0x${address:04X}:')} 0x${self.memory.read(address):02X}")
 			return true
 		}
 
@@ -164,13 +164,13 @@ fn (mut self Emulator) execute_debug_command() bool {
 			}
 
 			// Parsing the address.
-			address := u16(strconv.common_parse_int(commands[2], 16, 16, false, false) or {
+			address := u16(strconv.common_parse_uint(commands[2], 16, 16, false, false) or {
 				println(term.red('Invalid address.'))
 				return true
 			})
 
 			// Printing the address value.
-			println('0x${address:04X}: 0x${self.memory.read2(address):04X}')
+			println('${term.blue("0x${address:04X}:")} 0x${self.memory.read2(address):04X}')
 			return true
 		}
 
