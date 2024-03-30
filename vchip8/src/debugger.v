@@ -154,6 +154,17 @@ fn (mut self Emulator) execute_debug_command() bool {
 
 			// Printing the address value.
 			println("${term.blue('0x${address:04X}:')} 0x${self.memory.read(address):02X}")
+
+			// Check for range.
+			if commands.len > 3 {
+				address_end := u16(strconv.common_parse_uint(commands[3], 16, 16, false, false) or {
+					println(term.red('Invalid end address.'))
+					return true
+				})
+				for index in 1 .. address_end - address + 1 {
+					println("${term.blue('0x${address + index:04X}:')} 0x${self.memory.read(address + index):02X}")
+				}
+			}
 			return true
 		}
 
@@ -171,6 +182,17 @@ fn (mut self Emulator) execute_debug_command() bool {
 
 			// Printing the address value.
 			println('${term.blue("0x${address:04X}:")} 0x${self.memory.read2(address):04X}')
+
+			// Check for range
+			if commands.len > 3 {
+				address_end := u16(strconv.common_parse_uint(commands[3], 16, 16, false, false) or {
+					println(term.red('Invalid end address.'))
+					return true
+				})
+				for index in 1 .. (address_end - address) / 2 + 1 {
+					println('${term.blue("0x${address + index * 2:04X}:")} 0x${self.memory.read2(address + index * 2):04X}')
+				}
+			}
 			return true
 		}
 

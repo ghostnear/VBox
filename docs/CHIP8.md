@@ -14,10 +14,10 @@ By specifying the `"debug": "true"` option in the JSON of the config of the ROM 
 - (`print` | `p`)
     - (`registers` | `r`)
         - Prints all the registers to the screen in hexadecimal form.
-    - (`memory-byte` | `mb`) `<addr>`
-        - Prints the byte at the specified address in hexadecimal form.
-    - (`memory-word` | `mw`) `<addr>`
-        - Prints the word at the specified address in hexadecimal form.
+    - (`memory-byte` | `mb`) `<addr>` [`<addr_end>`]
+        - Prints the byte at the specified address / address range in hexadecimal form.
+    - (`memory-word` | `mw`) `<addr>` [`<addr_end>`]
+        - Prints the word at the specified address / address range in hexadecimal form.
 - (`dissasemble` | `disasm` | `dm`) `<size>`
     - Disassembles the next `size` bytes of the ROM __around__ the PC and prints them to the screen.
 - (`breakpoint` | `bp`) `<addr>`
