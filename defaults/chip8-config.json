@@ -2,6 +2,7 @@
     "preset": "chip8",
     "data": {
         "path": "roms/chip8/tests/1-chip8-logo.ch8",
-        "debug": "true"
+        "debug": "true",
+        "display": "sdl"
     }
 }

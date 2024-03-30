@@ -13,7 +13,7 @@ mut:
 	// This is called to configure the virtual machine from an initial JSON config.
 	configure(config map[string]string) !bool
 	// This function is called to update the state of the virtual machine.
-	update(delta f32) bool
+	update(delta f64) bool
 	// This function should draw the current output to a framebuffer.
 	draw()
 }

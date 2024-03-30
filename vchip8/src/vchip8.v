@@ -6,7 +6,11 @@ import log
 pub struct Emulator {
 mut:
 	debug_mode bool
+	spawned_debug_thread bool
+	debug_thread &thread bool = unsafe{ nil }
+
 	memory     Memory
+	display    Display
 }
 
 pub fn (mut self Emulator) configure(config map[string]string) !bool {
@@ -27,6 +31,26 @@ pub fn (mut self Emulator) configure(config map[string]string) !bool {
 	// Enable debug mode.
 	if 'debug' in config {
 		self.debug_mode = if config['debug'] == 'true' { true } else { false }
+	}
+
+	// Get display driver to use.
+	if 'display' in config {
+		match config['display'] {
+			'stub' {
+				self.display = DisplayStub{}
+			}
+			'sdl' {
+				mut result := DisplaySDL{}
+				self.display = result.configure(DisplaySDLConfig{
+					width: 640
+					height: 320
+					title: 'VCHIP8'
+				})
+			}
+			else {
+				return error('Unknown display driver: ${config['display']}')
+			}
+		}
 	}
 
 	return true
@@ -76,10 +100,25 @@ fn (mut self Emulator) step() !bool {
 	return true
 }
 
-pub fn (mut self Emulator) update(delta f32) bool {
+pub fn (mut self Emulator) update(delta f64) bool {
+	// If display called an end to this, we are gonna end.
+	if self.display.update(delta) == false {
+		return false
+	}
+
 	// Debug mode special stuff.
 	if self.debug_mode {
-		return self.execute_debug_command()
+		if !self.spawned_debug_thread {
+			if self.debug_thread != unsafe { nil } {
+				result := (*(self.debug_thread)).wait()
+				if result == false {
+					return false
+				}
+			}
+			self.spawned_debug_thread = true
+			self.debug_thread = &spawn self.execute_debug_command()
+		}
+		return true
 	}
 
 	// Normal step

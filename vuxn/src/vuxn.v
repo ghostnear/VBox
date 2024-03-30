@@ -434,7 +434,7 @@ fn (mut self Emulator) step() bool {
 	return true
 }
 
-pub fn (mut self Emulator) update(delta f32) bool {
+pub fn (mut self Emulator) update(delta f64) bool {
 	if !self.step() {
 		return false
 	}

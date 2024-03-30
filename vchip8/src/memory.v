@@ -6,7 +6,7 @@ mut:
 	pc  u16  = 0x200
 	ram []u8 = []u8{len: 0x10000, cap: 0x10000, init: 0x00}
 	v   []u8 = []u8{len: 0x10, cap: 0x10, init: 0x00}
-	i  	u16  = 0x00
+	i   u16  = 0x00
 }
 
 @[inline]

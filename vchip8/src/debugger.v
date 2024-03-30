@@ -5,13 +5,13 @@ import term
 import strconv
 
 fn (mut self Emulator) print_registers() {
-	println('${term.blue("I:")} 0x${self.memory.i:04X}')
-	println('${term.blue("PC:")} 0x${self.memory.pc:04X}')
+	println("${term.blue('I:')} 0x${self.memory.i:04X}")
+	println("${term.blue('PC:')} 0x${self.memory.pc:04X}")
 	// println("SP: 0x${self.memory.sp:02X}")
 	// println("DT: 0x${self.memory.dt:02X}")
 	// println("ST: 0x${self.memory.st:02X}")
 	for index in 0 .. 0x10 {
-		print('${term.blue("V${index:01X}:")} 0x${self.memory.v[index]:02X} ')
+		print("${term.blue('V${index:01X}:')} 0x${self.memory.v[index]:02X} ")
 		if index % 4 == 3 && index != 0x10 {
 			print('\n')
 		}
@@ -108,6 +108,7 @@ fn (mut self Emulator) disassemble_instruction(instruction u16) string {
 fn (mut self Emulator) execute_debug_command() bool {
 	print(term.yellow('(vchip8dbg)> '))
 	command := os.get_raw_line().trim_space()
+	self.spawned_debug_thread = false
 
 	// Easy one line commands.
 	if command.compare('exit') == 0 || command.compare('q') == 0 || command.compare('quit') == 0 {
@@ -157,12 +158,14 @@ fn (mut self Emulator) execute_debug_command() bool {
 
 			// Check for range.
 			if commands.len > 3 {
-				address_end := u16(strconv.common_parse_uint(commands[3], 16, 16, false, false) or {
+				address_end := u16(strconv.common_parse_uint(commands[3], 16, 16, false,
+					false) or {
 					println(term.red('Invalid end address.'))
 					return true
 				})
 				for index in 1 .. address_end - address + 1 {
-					println("${term.blue('0x${address + index:04X}:')} 0x${self.memory.read(address + index):02X}")
+					println("${term.blue('0x${address + index:04X}:')} 0x${self.memory.read(
+						address + index):02X}")
 				}
 			}
 			return true
@@ -181,16 +184,18 @@ fn (mut self Emulator) execute_debug_command() bool {
 			})
 
 			// Printing the address value.
-			println('${term.blue("0x${address:04X}:")} 0x${self.memory.read2(address):04X}')
+			println("${term.blue('0x${address:04X}:')} 0x${self.memory.read2(address):04X}")
 
 			// Check for range
 			if commands.len > 3 {
-				address_end := u16(strconv.common_parse_uint(commands[3], 16, 16, false, false) or {
+				address_end := u16(strconv.common_parse_uint(commands[3], 16, 16, false,
+					false) or {
 					println(term.red('Invalid end address.'))
 					return true
 				})
 				for index in 1 .. (address_end - address) / 2 + 1 {
-					println('${term.blue("0x${address + index * 2:04X}:")} 0x${self.memory.read2(address + index * 2):04X}')
+					println("${term.blue('0x${address + index * 2:04X}:')} 0x${self.memory.read2(
+						address + index * 2):04X}")
 				}
 			}
 			return true
